@@ -1,14 +1,27 @@
-#include <string>
-#include <cstring>
+// streams
 #include <iostream>
 #include <fstream>
+
+// data structures
+#include <string>
+#include <vector>
+#include <iterator>
+
+// the 300 iq header
+#include <algorithm>
+
+// c headers
+#include <cstring>
+#include <cstdint>
+
+using i16 = int_least16_t;
+using u16 = uint_least16_t;
 
 namespace emu {
     enum PROGRAM_OPTIONS {
         HEX = 0x1
     };
 }
-
 
 // To the best of my knowledge, I will separate OS specific things here.
 namespace os {
@@ -24,22 +37,37 @@ namespace os {
             return ret;
         }
         
-        // usage implies last arg is rom
+        // Usage implies last arg is rom
         ret.path = args[--count];
 
-        // parse options
+        // Parse options
         for (int i = 1; i < count; ++i) {
-            if (std::strcmp("dump", args[i]) == 0) {
+            if (strcmp("dump", args[i]) == 0) {
                 ret.options |= emu::PROGRAM_OPTIONS::HEX;
             }
         }
 
         return ret;
     }
+
+    // We will assume that the file can be stored in memory all at once
+    std::vector<u16> ReadChip8File(std::string path) {        
+        std::ifstream file(path, std::ios::binary);
+
+        if (!file.is_open()) {
+            return std::vector<u16>();
+        }
+
+        // https://stackoverflow.com/questions/5420317/reading-and-writing-binary-file
+        return std::vector<u16>(std::istreambuf_iterator<char>(file), {});
+    }
 }
 
 namespace emu {
     /*
+    Od is your friend:
+    od -x roms/games/Paddles.ch8
+
     http://emulator101.com/
     TODO: Read through it.
 
@@ -102,15 +130,37 @@ namespace emu {
         Program(const os::Arguments& args)
             : options(args.options)
             , path(args.path)
-            , content("")
-        {}
+        {
+            program = os::ReadChip8File(path);
+        }
+
+        void PrintContent() {
+            using std::cout;
+            using std::endl;
+
+            unsigned int lineBuf = 0;
+            unsigned int opBuf = 1;
+
+            for (u16 op: program) {
+                if (lineBuf++ % 16 == 0) {
+                    cout << endl;
+                    opBuf = 1;
+                } else if (opBuf++ % 2 == 0) {
+                    putchar(' ');
+                }
+
+                printf("%x", op);
+            }
+
+            cout << endl;
+        }
 
     private:
-        std::string content = "";
+        std::vector<u16> program;
     };
 }
 
-int main(int argc, char** argv) {
+void Run(int argc, char** argv) {
     using std::cout;
     using std::endl;
 
@@ -119,8 +169,24 @@ int main(int argc, char** argv) {
 
     if (program.path.empty()) {
         cout << "Usage: chip8 <options> path_to_rom" << endl;
-        return 0;
+        return;
     }
 
-    cout << program.options << endl << program.path << endl;
+    cout << program.options << ' ' << program.path << endl;
+}
+
+int QuickTest(int argc, char** argv) {
+    using std::cout;
+    using std::endl;
+
+    emu::Program program({ 1, "roms/games/Paddles.ch8" });
+    program.PrintContent();
+    
+    // Ignore, this is just to supress the unused varaible warning
+    return (unsigned long long)(argc) == (unsigned long long)(argv[0]);
+}
+
+int main(int argc, char** argv) {
+    // Run(argc, argv);
+    QuickTest(argc, argv);
 }
