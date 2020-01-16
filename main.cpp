@@ -14,16 +14,19 @@
 #include <cstring>
 #include <cstdint>
 
+using i8  = int_least8_t;
 using i16 = int_least16_t;
 using i32 = int_least32_t;
 
+using u8 = uint_least8_t;
 using u16 = uint_least16_t;
 using u32 = uint_least32_t;
 
 
 namespace emu {
     enum PROGRAM_OPTIONS: u32 {
-        HEX = 0x1
+        OPTIONS_HEX  = 0x1,
+        OPTIONS_CODE = 0x2
     };
 }
 
@@ -44,8 +47,10 @@ namespace os {
 
             // Parse options
             for (int i = 1; i < count; ++i) {
-                if (strcmp("dump", args[i]) == 0) {
-                    options |= emu::PROGRAM_OPTIONS::HEX;
+                if (strcmp("hex", args[i]) == 0) {
+                    options |= emu::OPTIONS_HEX;
+                } else if (strcmp("code", args[i]) == 0) {
+                    options |= emu::OPTIONS_CODE;
                 }
             }
         }
@@ -57,21 +62,23 @@ namespace os {
     };
 
     // We will assume that the file can be stored in memory all at once
-    std::vector<u16> ReadChip8File(std::string path) {        
+    // Also, the program cannot have an odd number of bytes
+    std::vector<u8> ReadChip8File(std::string path) {        
         std::ifstream file(path, std::ios::binary);
 
         if (!file.is_open()) {
-            return std::vector<u16>();
+            return std::vector<u8>();
         }
 
         // https://stackoverflow.com/questions/5420317/reading-and-writing-binary-file
-        return std::vector<u16>(std::istreambuf_iterator<char>(file), {});
+        auto program = std::vector<u8>(std::istreambuf_iterator<char>(file), {});
+        return program.size() % 2 == 0 ? program : std::vector<u8>();
     }
 }
 
 namespace emu {
     /*
-    Od is your friend:
+    od is your friend:
     od -x roms/games/Paddles.ch8
 
     http://emulator101.com/
@@ -130,6 +137,7 @@ namespace emu {
 
     class Program {
     public:
+        using size_type = std::vector<u8>::size_type;
         const os::Arguments arguments;
         
         Program(const char* path, u32 options)
@@ -144,14 +152,14 @@ namespace emu {
             program = os::ReadChip8File(arguments.path);
         }
 
-        void PrintContent() {
+        void DumpHex() {
             using std::cout;
             using std::endl;
 
             unsigned int lineBuf = 0;
             unsigned int opBuf = 1;
 
-            for (u16 op: program) {
+            for (u8 op: program) {
                 if (lineBuf++ % 16 == 0) {
                     cout << endl;
                     opBuf = 1;
@@ -159,14 +167,54 @@ namespace emu {
                     putchar(' ');
                 }
 
-                printf("%x", op);
+                printf("%.2x", op);
+            }
+
+            cout << endl << endl;
+        }
+
+        void Disassemble() {
+            using std::cout;
+            using std::endl;
+
+            cout << endl;
+
+            for (size_type i = 0; i < program.size(); i += 2) {
+                switch (program[i] >> 4) {
+                case 0x00: printf("0 not handled yet"); break;
+                case 0x01: printf("1 not handled yet"); break;
+                case 0x02: printf("2 not handled yet"); break;
+                case 0x03: printf("3 not handled yet"); break;
+                case 0x04: printf("4 not handled yet"); break;
+                case 0x05: printf("5 not handled yet"); break;
+                case 0x06: {
+                        uint8_t reg = program[0] & 0x0f;
+                        printf("%-10s V%01X,#$%02x", "MVI", reg, program[1]);
+                    }
+                    break;
+                case 0x07: printf("7 not handled yet"); break;
+                case 0x08: printf("8 not handled yet"); break;
+                case 0x09: printf("9 not handled yet"); break;
+                case 0x0a: {
+                        uint8_t addresshi = program[0] & 0x0f;
+                        printf("%-10s I,#$%01x%02x", "MVI", addresshi, program[1]);
+                    }
+                    break;
+                case 0x0b: printf("b not handled yet"); break;
+                case 0x0c: printf("c not handled yet"); break;
+                case 0x0d: printf("d not handled yet"); break;
+                case 0x0e: printf("e not handled yet"); break;
+                case 0x0f: printf("f not handled yet"); break;
+                }
+
+                putchar('\n');
             }
 
             cout << endl;
         }
 
     private:
-        std::vector<u16> program;
+        std::vector<u8> program;
     };
 }
 
@@ -181,8 +229,12 @@ void Run(int argc, char** argv) {
         return;
     }
 
-    if (program.arguments.options & emu::PROGRAM_OPTIONS::HEX) {
-        program.PrintContent();
+    if (program.arguments.options & emu::OPTIONS_HEX) {
+        program.DumpHex();
+    }
+
+    if (program.arguments.options & emu::OPTIONS_CODE) {
+        program.Disassemble();
     }
 
     cout << program.arguments.options << ' ' << program.arguments.path << endl;
@@ -193,13 +245,13 @@ int QuickTest(int argc, char** argv) {
     using std::endl;
 
     emu::Program program("roms/games/Paddles.ch8", 1);
-    program.PrintContent();
+    program.DumpHex();
     
     // Ignore, this is just to supress the unused varaible warning
     return (unsigned long long)(argc) == (unsigned long long)(argv[0]);
 }
 
 int main(int argc, char** argv) {
-    // Run(argc, argv);
-    QuickTest(argc, argv);
+    Run(argc, argv);
+    // QuickTest(argc, argv);
 }
