@@ -15,40 +15,46 @@
 #include <cstdint>
 
 using i16 = int_least16_t;
+using i32 = int_least32_t;
+
 using u16 = uint_least16_t;
+using u32 = uint_least32_t;
+
 
 namespace emu {
-    enum PROGRAM_OPTIONS {
+    enum PROGRAM_OPTIONS: u32 {
         HEX = 0x1
     };
 }
 
 // To the best of my knowledge, I will separate OS specific things here.
 namespace os {
-    struct Arguments {
-        int         options = 0;
+    class Arguments {
+    public:
+        u32         options = 0;
         std::string path    = "";
-    };
 
-    Arguments ProcessArguments(int count, char** args) {
-        Arguments ret;
+        Arguments(int count, char** args) {
+            if (count < 2) {
+                return;
+            }
 
-        if (count < 2) {
-            return ret;
-        }
-        
-        // Usage implies last arg is rom
-        ret.path = args[--count];
+            // Usage implies last arg is rom
+            path = args[--count];
 
-        // Parse options
-        for (int i = 1; i < count; ++i) {
-            if (strcmp("dump", args[i]) == 0) {
-                ret.options |= emu::PROGRAM_OPTIONS::HEX;
+            // Parse options
+            for (int i = 1; i < count; ++i) {
+                if (strcmp("dump", args[i]) == 0) {
+                    options |= emu::PROGRAM_OPTIONS::HEX;
+                }
             }
         }
 
-        return ret;
-    }
+        Arguments(const char* path, i32 options = 0)
+            : options(options)
+            , path(path)
+        {}
+    };
 
     // We will assume that the file can be stored in memory all at once
     std::vector<u16> ReadChip8File(std::string path) {        
@@ -124,14 +130,18 @@ namespace emu {
 
     class Program {
     public:
-        const int         options = 0;
-        const std::string path    = "";
+        const os::Arguments arguments;
         
-        Program(const os::Arguments& args)
-            : options(args.options)
-            , path(args.path)
+        Program(const char* path, u32 options)
+            : arguments(path, options)
         {
-            program = os::ReadChip8File(path);
+            program = os::ReadChip8File(arguments.path);
+        }
+
+        Program(int argc, char** argv)
+            : arguments(argc, argv)
+        {
+            program = os::ReadChip8File(arguments.path);
         }
 
         void PrintContent() {
@@ -164,22 +174,25 @@ void Run(int argc, char** argv) {
     using std::cout;
     using std::endl;
 
-    auto args = os::ProcessArguments(argc, argv);
-    emu::Program program(args);
+    emu::Program program(argc, argv);
 
-    if (program.path.empty()) {
+    if (program.arguments.path.empty()) {
         cout << "Usage: chip8 <options> path_to_rom" << endl;
         return;
     }
 
-    cout << program.options << ' ' << program.path << endl;
+    if (program.arguments.options & emu::PROGRAM_OPTIONS::HEX) {
+        program.PrintContent();
+    }
+
+    cout << program.arguments.options << ' ' << program.arguments.path << endl;
 }
 
 int QuickTest(int argc, char** argv) {
     using std::cout;
     using std::endl;
 
-    emu::Program program({ 1, "roms/games/Paddles.ch8" });
+    emu::Program program("roms/games/Paddles.ch8", 1);
     program.PrintContent();
     
     // Ignore, this is just to supress the unused varaible warning
