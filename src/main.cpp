@@ -1,6 +1,5 @@
 // streams
 #include <iostream>
-#include <fstream>
 
 // data structures
 #include <string>
@@ -12,69 +11,10 @@
 
 // c headers
 #include <cstring>
-#include <cstdint>
 
-using i8  = int_least8_t;
-using i16 = int_least16_t;
-using i32 = int_least32_t;
-
-using u8 = uint_least8_t;
-using u16 = uint_least16_t;
-using u32 = uint_least32_t;
-
-
-namespace emu {
-    enum PROGRAM_OPTIONS: u32 {
-        OPTIONS_HEX  = 0x1,
-        OPTIONS_CODE = 0x2
-    };
-}
-
-// To the best of my knowledge, I will separate OS specific things here.
-namespace os {
-    class Arguments {
-    public:
-        u32         options = 0;
-        std::string path    = "";
-
-        Arguments(int count, char** args) {
-            if (count < 2) {
-                return;
-            }
-
-            // Usage implies last arg is rom
-            path = args[--count];
-
-            // Parse options
-            for (int i = 1; i < count; ++i) {
-                if (strcmp("hex", args[i]) == 0) {
-                    options |= emu::OPTIONS_HEX;
-                } else if (strcmp("code", args[i]) == 0) {
-                    options |= emu::OPTIONS_CODE;
-                }
-            }
-        }
-
-        Arguments(const char* path, i32 options = 0)
-            : options(options)
-            , path(path)
-        {}
-    };
-
-    // We will assume that the file can be stored in memory all at once
-    // Also, the program cannot have an odd number of bytes, as per the spec
-    std::vector<u8> ReadChip8File(std::string path) {        
-        std::ifstream file(path, std::ios::binary);
-
-        if (!file.is_open()) {
-            return std::vector<u8>();
-        }
-
-        // https://stackoverflow.com/questions/5420317/reading-and-writing-binary-file
-        auto program = std::vector<u8>(std::istreambuf_iterator<char>(file), {});
-        return program.size() % 2 == 0 ? program : std::vector<u8>();
-    }
-}
+// my headers
+#include "def.hpp"
+#include "os.hpp"
 
 namespace emu {
     /*

@@ -3,7 +3,7 @@ NAME = chip8
 WARNINGS = -Wall -Wextra -Werror
 COMPILER = clang++-6.0 -std=c++14
 
-SOURCES = main.cpp
+SOURCES = src/*.cpp
 SDL = -lSDL2
 
 rel: clang
