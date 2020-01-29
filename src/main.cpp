@@ -1,20 +1,5 @@
-// streams
 #include <iostream>
 
-// data structures
-#include <string>
-#include <vector>
-#include <iterator>
-
-// the 300 iq header
-#include <algorithm>
-
-// c headers
-#include <cstring>
-
-// my headers
-#include "def.hpp"
-#include "os.hpp"
 #include "chip8.hpp"
 
 void Run(int argc, char** argv) {
