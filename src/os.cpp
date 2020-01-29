@@ -1,6 +1,7 @@
-#include "os.hpp"
 #include <cstring>
 #include <fstream>
+
+#include "os.hpp"
 
 os::Arguments::Arguments(int count, char** args) {
     if (count < 2) {
