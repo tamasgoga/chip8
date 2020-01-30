@@ -41,24 +41,43 @@ void emu::Program::Disassemble() const {
 
     cout << endl;
 
-    auto printInstr = [this] (size_type i, const char* name) {
-        printf("%.2x%-8.2x %-10s ", program[i], program[i + 1], name);
+    u32 pc = 0;
+    auto printInstr = [this, &pc] (size_type i, const char* name) {
+        printf("%.8x   <%.2x%.2x>   %-7s ", pc, program[i], program[i + 1], name);
+        pc += 0x10;
     };
 
     for (size_type i = 0; i < program.size(); i += 2) {
         switch (program[i] >> 4) {
-        case 0x00: printf("0 not handled yet"); break;
+        case 0x00: {
+                printInstr(i, "0");
+            }
+            break;
         case 0x01: {
+                // 1nnn: goto NNN; Jumps to address nnn.
                 printInstr(i, "JMP");
                 u16 addr = ((u16(program[i]) & 0x00f) << 8) | program[i + 1];
                 printf("%.3x", addr);
             }
             break;
-        case 0x02: printf("2 not handled yet"); break;
-        case 0x03: printf("3 not handled yet"); break;
-        case 0x04: printf("4 not handled yet"); break;
-        case 0x05: printf("5 not handled yet"); break;
+        case 0x02: {
+                printInstr(i, "2");
+            }
+            break;
+        case 0x03: {
+                printInstr(i, "3");
+            }
+            break;
+        case 0x04: {
+                printInstr(i, "4");
+            }
+            break;
+        case 0x05: {
+                printInstr(i, "5");
+            }
+            break;
         case 0x06: {
+                // 6xnn: Vx = nn; Sets VX to NN.
                 u8 reg = program[i] & 0x0f;
                 i8 con = program[i + 1];
                 printInstr(i, "MOV");
@@ -66,25 +85,48 @@ void emu::Program::Disassemble() const {
             }
             break;
         case 0x07: {
-                //7XNN	Const	Vx += NN	Adds NN to VX. (Carry flag is not changed)
+                //7xnn: Vx += nn; Adds nn to Vx. (Carry flag is not changed)
                 u8 reg = program[i] & 0x0f;
                 i8 con = program[i + 1];
                 printInstr(i, "ADD");
                 printf("V%.2u, %d", reg, con);
             }
             break;
-        case 0x08: printf("8 not handled yet"); break;
-        case 0x09: printf("9 not handled yet"); break;
-        case 0x0a: {
-                u8 addresshi = program[i] & 0x0f;
-                printf("%-10s I,#$%01x%02x", "MVI", addresshi, program[i + 1]);
+        case 0x08: {
+                printInstr(i, "8");
             }
             break;
-        case 0x0b: printf("b not handled yet"); break;
-        case 0x0c: printf("c not handled yet"); break;
-        case 0x0d: printf("d not handled yet"); break;
-        case 0x0e: printf("e not handled yet"); break;
-        case 0x0f: printf("f not handled yet"); break;
+        case 0x09: {
+                printInstr(i, "9");
+            }
+            break;
+        case 0x0a: {
+                //Annn: i = nnn; Sets i to the address nnn.
+                u16 addr = ((u16(program[i]) & 0x00f) << 8) | program[i + 1];
+                printInstr(i, "MVI");
+                printf("%.3x", addr);
+            }
+            break;
+        case 0x0b: {
+                printInstr(i, "b");
+            }
+            break;
+        case 0x0c: {
+                printInstr(i, "c");
+            }
+            break;
+        case 0x0d: {
+                printInstr(i, "d");
+            }
+            break;
+        case 0x0e: {
+                printInstr(i, "e");
+            }
+            break;
+        case 0x0f: {
+                printInstr(i, "f");
+            }
+            break;
         }
 
         putchar('\n');
