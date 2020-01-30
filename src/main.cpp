@@ -29,20 +29,24 @@ int QuickTest(int argc, char** argv) {
     using std::endl;
 
     emu::Program program("roms/games/Paddles.ch8", 1);
-    program.DumpHex();
+    // emu::Program program("roms/programs/SQRT Test [Sergey Naydenov, 2010].ch8", 1);
+
+    // program.DumpHex();
+    program.Disassemble();
     
     // Ignore, this is just to supress the unused varaible warning
     return (unsigned long long)(argc) == (unsigned long long)(argv[0]);
 }
 
 int main(int argc, char** argv) {
-    Run(argc, argv);
-    // QuickTest(argc, argv);
+    // Run(argc, argv);
+    QuickTest(argc, argv);
 }
 
 /*
 od is your friend:
 od -x roms/games/Paddles.ch8
+od -x roms/programs/SQRT Test [Sergey Naydenov, 2010].ch8
 
 http://emulator101.com/
 TODO: Read through it.
