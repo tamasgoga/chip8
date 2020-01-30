@@ -61,17 +61,28 @@ void emu::Program::Disassemble() const {
     for (size_type i = 0; i < program.size(); i += 2) {
         switch (program[i] >> 4) {
         case 0x00: {
-                // clear screen, return, RCA calls
+                // clear screen, return, sys calls
                 switch (program[i + 1]) {
                     case 0xe0: printInstr(i, "CLS"); break;
                     case 0xee: printInstr(i, "RET"); break;
                     default: {
-                            // 0nnn: Calls RCA 1802 program at address nnn. Not necessary for most ROMs.
+                            // 0nnn: This instruction is only used on the old computers on which Chip-8 was originally implemented.
+                            // It is ignored by modern interpreters.
                             u16 nnn = get16BitAddress(program[i], program[i + 1]);
-                            printInstr(i, "RCA");
+                            printInstr(i, "SYS");
                             printf("%X", nnn);
                         }
                         break;
+
+                    /*
+                    Super Chip-48:
+                    00Cn - SCD nibble
+                    00FB - SCR
+                    00FC - SCL
+                    00FD - EXIT
+                    00FE - LOW
+                    00FF - HIGH
+                    */
                 }
             }
             break;
@@ -227,6 +238,8 @@ void emu::Program::Disassemble() const {
                 u8 n = get4BitAddressRight(program[i + 1]);
                 printInstr(i, "DRAW");
                 printf("V%X, V%X, %.2u", vx, vy, n);
+
+                // Super Chip-48: Dxy0 - DRW Vx, Vy, 0
             }
             break;
         case 0x0e: {
@@ -316,6 +329,13 @@ void emu::Program::Disassemble() const {
                 default:
                     printInstr(i, "; unknown (F)");
                     break;
+
+                /*
+                Super Chip-48:
+                Fx30 - LD HF, Vx
+                Fx75 - LD R, Vx
+                Fx85 - LD Vx, R
+                */
                 }
             }
             break;
