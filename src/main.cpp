@@ -28,11 +28,12 @@ int QuickTest(int argc, char** argv) {
     using std::cout;
     using std::endl;
 
-    // emu::Program program("roms/games/Paddles.ch8", 1);
-    emu::Program program("roms/programs/SQRT Test [Sergey Naydenov, 2010].ch8", 1);
+    emu::Program program("roms/games/Paddles.ch8", 1);
+    // emu::Program program("roms/programs/SQRT Test [Sergey Naydenov, 2010].ch8", 1);
 
     // program.DumpHex();
     program.Disassemble();
+    cout << program.arguments.path << ", " << program.arguments.options << endl;
     
     // Ignore, this is just to supress the unused varaible warning
     return (unsigned long long)(argc) == (unsigned long long)(argv[0]);
