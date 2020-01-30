@@ -40,8 +40,8 @@ int QuickTest(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
-    // Run(argc, argv);
-    QuickTest(argc, argv);
+    Run(argc, argv);
+    // QuickTest(argc, argv);
 }
 
 /*
