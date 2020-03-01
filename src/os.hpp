@@ -24,6 +24,9 @@ namespace os {
     // We will assume that the file can be stored in memory all at once
     // Also, the program cannot have an odd number of bytes, as per the spec
     std::vector<u8> ReadChip8File(std::string path);
+
+    //
+    const char* GetFileError();
 }
 
 #endif // GOGA_TAMAS_CHIP_8_OS_HPP

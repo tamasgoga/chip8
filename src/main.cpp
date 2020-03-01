@@ -2,6 +2,10 @@
 
 #include "chip8.hpp"
 
+// OPTIONS:
+// hex
+// asm
+
 void Run(int argc, char** argv) {
     using std::cout;
     using std::endl;
@@ -12,6 +16,8 @@ void Run(int argc, char** argv) {
         cout << "Usage: chip8 <options> path_to_rom" << endl;
         return;
     }
+
+    cout << os::GetFileError() << endl;
 
     if (program.arguments.options & emu::OPTIONS_HEX) {
         program.DumpHex();
@@ -30,6 +36,7 @@ int QuickTest(int argc, char** argv) {
 
     emu::Program program("roms/games/Paddles.ch8", 1);
     // emu::Program program("roms/programs/SQRT Test [Sergey Naydenov, 2010].ch8", 1);
+    cout << os::GetFileError() << endl;
 
     // program.DumpHex();
     program.Disassemble();
@@ -40,8 +47,11 @@ int QuickTest(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
+#ifdef TEST
+    QuickTest(argc, argv);
+#else
     Run(argc, argv);
-    // QuickTest(argc, argv);
+#endif
 }
 
 /*
