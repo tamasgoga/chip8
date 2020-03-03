@@ -2,6 +2,8 @@
 
 #include "chip8.hpp"
 
+// C-tors
+
 emu::Program::Program(const char* path, u32 options)
     : arguments(path, options)
 {
@@ -14,49 +16,46 @@ emu::Program::Program(int argc, char** argv)
     program = os::ReadChip8File(arguments.path);
 }
 
+// Dump program hexa
 void emu::Program::DumpHex() const {
-    using std::cout;
-    using std::endl;
+    if (program.size() < 2) {
+        return;
+    }
 
-    u32 lineBuf = 0;
-    u32 opBuf = 1;
+    auto it = program.cbegin();
+    printf("%.2x", *it++);
+    printf("%.2x", *it++);
+    u32 formatCounter = 2u;
 
-    for (u8 op: program) {
-        if (lineBuf++ % 16 == 0) {
-            cout << endl;
-            opBuf = 1;
-        } else if (opBuf++ % 2 == 0) {
+    for (; it != program.cend(); it++, formatCounter++) {
+        if (formatCounter % 16 == 0u) {
+            putchar('\n');
+        } else if (formatCounter % 2 == 0u) {
             putchar(' ');
         }
 
-        printf("%.2x", op);
+        printf("%.2x", *it);
     }
 
-    cout << endl << endl;
+    putchar('\n');
 }
 
-static inline u8 get4BitAddressRight(u8 x) {
-    return x & 0x0f;
-}
+// Bit twiddling
 
-static inline u8 get4BitAddressLeft(u8 x) {
-    return (x & 0xf0) >> 4;
-}
+static inline u8 get4BitAddressRight(u8 x) { return x & 0x0f; }
+static inline u8 get4BitAddressLeft(u8 x)  { return (x & 0xf0) >> 4;}
 
 static inline u16 get16BitAddress (u8 x, u8 y) {
     return ((u16(x) & 0x00f) << 8) | y;
 }
 
+// Disassemble program
 void emu::Program::Disassemble() const {
-    using std::cout;
-    using std::endl;
     static constexpr u32 MEM_START = 0x200;
 
     auto printInstr = [this] (size_type i, const char* name) {
-        printf("%.8x   <%.2x%.2x>   %-8s ", (u32(i) + MEM_START), program[i], program[i + 1], name);
+        printf("%.4x:   <%.2x%.2x>   %-8s ", (u32(i) + MEM_START), program[i], program[i + 1], name);
     };
-
-    cout << endl;
 
     for (size_type i = 0; i < program.size(); i += 2) {
         switch (program[i] >> 4) {
@@ -343,6 +342,4 @@ void emu::Program::Disassemble() const {
 
         putchar('\n');
     }
-
-    cout << endl;
 }

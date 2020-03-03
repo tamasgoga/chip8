@@ -3,6 +3,8 @@
 
 #include "os.hpp"
 
+// Arguments
+
 os::Arguments::Arguments(int count, char** args) {
     if (count < 2) {
         return;
@@ -21,6 +23,8 @@ os::Arguments::Arguments(int count, char** args) {
     }
 }
 
+// Files
+
 static const char* fileError = nullptr;
 
 std::vector<u8> os::ReadChip8File(std::string path) {        
@@ -37,6 +41,10 @@ std::vector<u8> os::ReadChip8File(std::string path) {
     return program.size() % 2 == 0 ? program : std::vector<u8>();
 }
 
-const char* os::GetFileError() {
-    return fileError == nullptr ? "" : fileError; 
+bool os::HasFileError() noexcept {
+    return fileError != nullptr;
+}
+
+const char* os::GetFileError() noexcept {
+    return fileError != nullptr ? fileError : ""; 
 }

@@ -17,14 +17,21 @@ void Run(int argc, char** argv) {
         return;
     }
 
-    cout << os::GetFileError() << endl;
+    if (os::HasFileError()) {
+        cout << os::GetFileError() << endl;
+        return;
+    }
+
+    cout << endl;
 
     if (program.arguments.options & emu::OPTIONS_HEX) {
         program.DumpHex();
+        cout << endl;
     }
 
     if (program.arguments.options & emu::OPTIONS_CODE) {
         program.Disassemble();
+        cout << endl;
     }
 
     cout << program.arguments.options << ' ' << program.arguments.path << endl;

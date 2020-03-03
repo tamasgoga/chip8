@@ -4,6 +4,10 @@
 #include "os.hpp"
 
 namespace emu {
+    struct State {
+        int mem; // placeholder
+    };
+
     class Program {
     public:
         using size_type = std::vector<u8>::size_type;
