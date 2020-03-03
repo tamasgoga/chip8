@@ -36,9 +36,16 @@ std::vector<u8> os::ReadChip8File(std::string path) {
         return std::vector<u8>();
     }
 
+    // Not optimal, but good enough considering these programs should be less than 4KB.
+
     // https://stackoverflow.com/questions/5420317/reading-and-writing-binary-file
-    auto program = std::vector<u8>(std::istreambuf_iterator<char>(file), {});
-    return program.size() % 2 == 0 ? program : std::vector<u8>();
+    auto bytes = std::vector<u8>(std::istreambuf_iterator<char>(file), {});
+    if (bytes.size() % 2 != 0) {
+        fileError = "The program should have an even amount of bytes";
+        return std::vector<u8>();
+    }
+
+    return bytes;
 }
 
 bool os::HasFileError() noexcept {
