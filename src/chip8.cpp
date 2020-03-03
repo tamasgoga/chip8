@@ -2,6 +2,10 @@
 
 #include "chip8.hpp"
 
+// Constants
+
+static constexpr u32 MEM_START = 0x200;
+
 // C-tors
 
 emu::Program::Program(const char* path, u32 options)
@@ -23,14 +27,14 @@ void emu::Program::DumpHex() const {
     }
 
     auto it = program.cbegin();
+    printf("%.4x:   %.2x", MEM_START, *it++);
     printf("%.2x", *it++);
-    printf("%.2x", *it++);
-    u32 formatCounter = 2u;
+    u32 opCount = 2u;
 
-    for (; it != program.cend(); it++, formatCounter++) {
-        if (formatCounter % 16 == 0u) {
-            putchar('\n');
-        } else if (formatCounter % 2 == 0u) {
+    for (; it != program.cend(); it++, opCount++) {
+        if (opCount % 16 == 0u) {
+            printf("\n%.4x:   ", MEM_START + opCount);
+        } else if (opCount % 2 == 0u) {
             putchar(' ');
         }
 
@@ -51,8 +55,6 @@ static inline u16 get16BitAddress (u8 x, u8 y) {
 
 // Disassemble program
 void emu::Program::Disassemble() const {
-    static constexpr u32 MEM_START = 0x200;
-
     auto printInstr = [this] (size_type i, const char* name) {
         printf("%.4x:   <%.2x%.2x>   %-8s ", (u32(i) + MEM_START), program[i], program[i + 1], name);
     };
@@ -152,17 +154,17 @@ void emu::Program::Disassemble() const {
                     printf("V%X, V%X", vx, vy);
                     break;
                 case 0x1:
-                    // 8xy1: Vx = Vx|Vy; Sets Vx to Vx or Vy. (Bitwise OR operation)
+                    // 8xy1: Vx |= Vy; Sets Vx to Vx or Vy. (Bitwise OR operation)
                     printInstr(i, "OR");
                     printf("V%X, V%X", vx, vy);
                     break;
                 case 0x2:
-                    // 8xy2: Vx = Vx & Vy; Sets Vx to Vx and Vy. (Bitwise AND operation)
+                    // 8xy2: Vx &= Vy; Sets Vx to Vx and Vy. (Bitwise AND operation)
                     printInstr(i, "AND");
                     printf("V%X, V%X", vx, vy);
                     break;
                 case 0x3:
-                    // 8xy3: Vx = Vx ^ Vy; Sets Vx to Vx xor Vy.
+                    // 8xy3: Vx ^= Vy; Sets Vx to Vx xor Vy.
                     printInstr(i, "XOR");
                     printf("V%X, V%X", vx, vy);
                     break;
