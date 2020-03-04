@@ -1,7 +1,7 @@
 #include <iostream>
 #include <exception>
 
-#include "chip8.hpp"
+#include "program.hpp"
 
 // OPTIONS:
 // hex
