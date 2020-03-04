@@ -1,4 +1,5 @@
 #include <iostream>
+#include <exception>
 
 #include "chip8.hpp"
 
@@ -47,18 +48,26 @@ int QuickTest(int argc, char** argv) {
 
     // program.DumpHex();
     program.Disassemble();
-    cout << program.arguments.path << ", " << program.arguments.options << endl;
+    cout << '\n' << program.arguments.path << ", " << program.arguments.options << endl;
     
     // Ignore, this is just to supress the unused varaible warning
     return (unsigned long long)(argc) == (unsigned long long)(argv[0]);
 }
 
 int main(int argc, char** argv) {
+    using std::cerr;
+    using std::endl;
+
+    // Not amazing error handling, but in any case.
+    try {
 #ifdef TEST
-    QuickTest(argc, argv);
+        QuickTest(argc, argv);
 #else
-    Run(argc, argv);
+        Run(argc, argv);
 #endif
+    } catch (const std::exception& e) {
+        cerr << "<<MAIN>> " << e.what() << endl;
+    }
 }
 
 /*

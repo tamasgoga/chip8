@@ -27,6 +27,8 @@ os::Arguments::Arguments(int count, char** args) {
 
 static const char* fileError = nullptr;
 
+// Not optimal, since we will have to parse the vector again.
+// Good enough, though, considering these programs should be less than 4KB.
 std::vector<u8> os::ReadChip8File(std::string path) {        
     fileError = nullptr;
     std::ifstream file(path, std::ios::binary);
@@ -35,8 +37,6 @@ std::vector<u8> os::ReadChip8File(std::string path) {
         fileError = strerror(errno);
         return std::vector<u8>();
     }
-
-    // Not optimal, but good enough considering these programs should be less than 4KB.
 
     // https://stackoverflow.com/questions/5420317/reading-and-writing-binary-file
     auto bytes = std::vector<u8>(std::istreambuf_iterator<char>(file), {});
