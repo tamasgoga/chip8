@@ -1,5 +1,5 @@
-#ifndef GOGA_TAMAS_CHIP_8_INSTR_HPP
-#define GOGA_TAMAS_CHIP_8_INSTR_HPP
+#ifndef GOGA_TAMAS_CHIP_8_INSTRUCTIONS_HPP
+#define GOGA_TAMAS_CHIP_8_INSTRUCTIONS_HPP
 
 #include <array>
 #include <vector>
@@ -187,4 +187,4 @@ namespace ch8 {
     };
 }
 
-#endif // GOGA_TAMAS_CHIP_8_INSTR_HPP
+#endif // GOGA_TAMAS_CHIP_8_INSTRUCTIONS_HPP
