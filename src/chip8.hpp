@@ -7,23 +7,25 @@
 namespace ch8 {
     class Program {
     public:
-        using size_type = std::vector<Instruction>::size_type;
+        using instruction_vector = std::vector<std::unique_ptr<Instruction>>;
+        using size_type          = instruction_vector::size_type;
 
         const os::Arguments arguments;
         
         Program(const char* path, u32 options);
         Program(int argc, char** argv);
 
-        void DumpHex() const;
+        void DumpHex() const noexcept;
 
-        void Disassemble();
-        void Execute();
+        // Both change the state.
+        void Disassemble() noexcept;
+        void Execute() noexcept;
 
     private:
-        void ParseBytes(std::vector<u8> bytes) noexcept;
+        void ParseBytes(std::vector<u8> bytes);
 
-        std::vector<std::unique_ptr<Instruction>> program;
-        State state;
+        instruction_vector program;
+        Chip8 state;
     };
 }
 

@@ -13,10 +13,11 @@ using u16 = uint_least16_t;
 using u32 = uint_least32_t;
 using u64 = uint_least64_t;
 
-namespace emu {
+namespace ch8 {
     enum PROGRAM_OPTIONS: u32 {
-        OPTIONS_HEX  = 0x1,
-        OPTIONS_CODE = 0x2
+        OPTIONS_HEX    = 0x1,
+        OPTIONS_CODE   = 0x2,
+        OPTIONS_NOEXEC = 0x4
     };
 }
 

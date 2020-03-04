@@ -19,46 +19,29 @@ void ch8::Instruction::PrintInstruction(const char* name) const noexcept {
 }
 
 void ch8::Instruction::Execute() noexcept {
-    printf("<pc = %.4x> Unknown instruction, nothing executed.\n", this->state.pc);
+    // printf("<pc = %.4x> Ignored instruction, nothing executed.\n", this->state.pc);
 }
 
-void ch8::Instruction::Disassemble() const noexcept {
-    PrintInstruction("; unknown");
+void ch8::Instruction::Disassemble() noexcept {
+    PrintInstruction("; ignored");
 }
 
 
-// 0x0: Sys calls.
+// 00e0: Clear screen.
 
-void ch8::SystemInstruction::Execute() noexcept {}
+void ch8::ClearScreenInstruction::Execute() noexcept {}
 
-void ch8::SystemInstruction::Disassemble() const noexcept {
-    // clear screen, return, sys calls
-    switch (r) {
-    case 0xe0:
-        PrintInstruction("CLS");
-        break;
-    case 0xee:
-        PrintInstruction("RET");
-        break;
-    default: {
-            // 0nnn: This instruction is only used on the old computers on which Chip-8 was originally implemented.
-            // It is ignored by modern interpreters.
-            u16 nnn = get16BitAddress(l, r);
-            PrintInstruction("SYS");
-            printf("%X", nnn);
-        }
-        break;
-    }
+void ch8::ClearScreenInstruction::Disassemble() noexcept {
+    PrintInstruction("CLS");
+}
 
-    /*
-    Extra Super Chip-48 stuff:
-    00Cn - SCD nibble
-    00FB - SCR
-    00FC - SCL
-    00FD - EXIT
-    00FE - LOW
-    00FF - HIGH
-    */
+
+// 00ee: Return.
+
+void ch8::ReturnInstruction::Execute() noexcept {}
+
+void ch8::ReturnInstruction::Disassemble() noexcept {
+    PrintInstruction("RET");
 }
 
 
@@ -66,7 +49,7 @@ void ch8::SystemInstruction::Disassemble() const noexcept {
 
 void ch8::JumpInstruction::Execute() noexcept {}
 
-void ch8::JumpInstruction::Disassemble() const noexcept {
+void ch8::JumpInstruction::Disassemble() noexcept {
     u16 nnn = get16BitAddress(l, r);
     PrintInstruction("JMP");
     printf("%X", nnn);
@@ -77,7 +60,7 @@ void ch8::JumpInstruction::Disassemble() const noexcept {
 
 void ch8::CallInstruction::Execute() noexcept {}
 
-void ch8::CallInstruction::Disassemble() const noexcept {
+void ch8::CallInstruction::Disassemble() noexcept {
     u16 nnn = get16BitAddress(l, r);
     PrintInstruction("CALL");
     printf("%X", nnn);
@@ -89,7 +72,7 @@ void ch8::CallInstruction::Disassemble() const noexcept {
 
 void ch8::SkipEqualInstruction::Execute() noexcept {}
 
-void ch8::SkipEqualInstruction::Disassemble() const noexcept {
+void ch8::SkipEqualInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
     PrintInstruction("SE");
@@ -101,7 +84,7 @@ void ch8::SkipEqualInstruction::Disassemble() const noexcept {
 
 void ch8::SkipNotEqualInstruction::Execute() noexcept {}
 
-void ch8::SkipNotEqualInstruction::Disassemble() const noexcept {
+void ch8::SkipNotEqualInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
     PrintInstruction("SNE");
@@ -113,7 +96,7 @@ void ch8::SkipNotEqualInstruction::Disassemble() const noexcept {
 
 void ch8::SkipRegisterEqualInstruction::Execute() noexcept {}
 
-void ch8::SkipRegisterEqualInstruction::Disassemble() const noexcept {
+void ch8::SkipRegisterEqualInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
     u8 vy= getLeftNibble(r);
     PrintInstruction("SRE");
@@ -125,7 +108,7 @@ void ch8::SkipRegisterEqualInstruction::Disassemble() const noexcept {
 
 void ch8::MoveInstruction::Execute() noexcept {}
 
-void ch8::MoveInstruction::Disassemble() const noexcept {
+void ch8::MoveInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
     PrintInstruction("MOV");
@@ -137,7 +120,7 @@ void ch8::MoveInstruction::Disassemble() const noexcept {
 
 void ch8::AddInstruction::Execute() noexcept {}
 
-void ch8::AddInstruction::Disassemble() const noexcept {
+void ch8::AddInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
     PrintInstruction("ADD");
@@ -148,7 +131,7 @@ void ch8::AddInstruction::Disassemble() const noexcept {
 
 void ch8::RegisterInstruction::Execute() noexcept {}
 
-void ch8::RegisterInstruction::Disassemble() const noexcept {
+void ch8::RegisterInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
     u8 vy = getLeftNibble(r);
 
@@ -209,7 +192,7 @@ void ch8::RegisterInstruction::Disassemble() const noexcept {
 
 void ch8::SkipRegisterNotEqualInstruction::Execute() noexcept {}
 
-void ch8::SkipRegisterNotEqualInstruction::Disassemble() const noexcept {
+void ch8::SkipRegisterNotEqualInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
     u8 vy = getLeftNibble(r);
     PrintInstruction("SRNE");
@@ -221,7 +204,7 @@ void ch8::SkipRegisterNotEqualInstruction::Disassemble() const noexcept {
 
 void ch8::MoveAddressInstruction::Execute() noexcept {}
 
-void ch8::MoveAddressInstruction::Disassemble() const noexcept {
+void ch8::MoveAddressInstruction::Disassemble() noexcept {
     u16 nnn = get16BitAddress(l, r);
     PrintInstruction("MOVI");
     printf("%X", nnn);
@@ -232,7 +215,7 @@ void ch8::MoveAddressInstruction::Disassemble() const noexcept {
 
 void ch8::JumpRegisterInstruction::Execute() noexcept {}
 
-void ch8::JumpRegisterInstruction::Disassemble() const noexcept {
+void ch8::JumpRegisterInstruction::Disassemble() noexcept {
     i16 nnn = get16BitAddress(l, r);
     PrintInstruction("JMPV");
     printf("%X", nnn);
@@ -243,7 +226,7 @@ void ch8::JumpRegisterInstruction::Disassemble() const noexcept {
 
 void ch8::RandomMaskInstruction::Execute() noexcept {}
 
-void ch8::RandomMaskInstruction::Disassemble() const noexcept {
+void ch8::RandomMaskInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
     u8 nn = r;
     PrintInstruction("RNDMSK");
@@ -258,7 +241,7 @@ void ch8::RandomMaskInstruction::Disassemble() const noexcept {
 
 void ch8::DrawInstruction::Execute() noexcept {}
 
-void ch8::DrawInstruction::Disassemble() const noexcept {
+void ch8::DrawInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
     u8 vy = getLeftNibble(r);
     u8 n = getRightNibble(r);
@@ -273,7 +256,7 @@ void ch8::DrawInstruction::Disassemble() const noexcept {
 
 void ch8::SkipKeyInstruction::Execute() noexcept {}
 
-void ch8::SkipKeyInstruction::Disassemble() const noexcept {
+void ch8::SkipKeyInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
 
     switch (r) {
@@ -298,7 +281,7 @@ void ch8::SkipKeyInstruction::Disassemble() const noexcept {
 
 void ch8::FunInstruction::Execute() noexcept {}
 
-void ch8::FunInstruction::Disassemble() const noexcept {
+void ch8::FunInstruction::Disassemble() noexcept {
     u8 vx = getRightNibble(l);
 
     switch (r) {

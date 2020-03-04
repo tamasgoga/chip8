@@ -6,6 +6,7 @@
 // OPTIONS:
 // hex
 // asm
+// noexec
 
 void Run(int argc, char** argv) {
     using std::cout;
@@ -25,14 +26,18 @@ void Run(int argc, char** argv) {
 
     cout << endl;
 
-    if (program.arguments.options & emu::OPTIONS_HEX) {
+    if (program.arguments.IsEnabled(ch8::OPTIONS_HEX)) {
         program.DumpHex();
         cout << endl;
     }
 
-    if (program.arguments.options & emu::OPTIONS_CODE) {
+    if (program.arguments.IsEnabled(ch8::OPTIONS_CODE)) {
         program.Disassemble();
         cout << endl;
+    }
+
+    if (!program.arguments.IsEnabled(ch8::OPTIONS_NOEXEC)) {
+        cout << "Will execute\n" << endl;
     }
 
     cout << program.arguments.options << ' ' << program.arguments.path << endl;
@@ -58,7 +63,6 @@ int main(int argc, char** argv) {
     using std::cerr;
     using std::endl;
 
-    // Not amazing error handling, but in any case.
     try {
 #ifdef TEST
         QuickTest(argc, argv);
@@ -70,10 +74,20 @@ int main(int argc, char** argv) {
     }
 }
 
+/** RULES:
+ * (1) Exceptions should not stop execution or disassembly.
+ * (2) Separate platform-dependent functionality, clearly.
+ * (3) All public methods and functions begin with upper-case. "main" is the only exception, for obvious reasons.
+ * (4) If it's a class: use its methods. If it's a struct: the properties may be used directly (or the convenience methods, if provided).
+ * (5) Don't add useless accessor methods.
+**/
+
 /*
 od is your friend:
 od -x roms/games/Paddles.ch8
 od -x roms/programs/SQRT Test [Sergey Naydenov, 2010].ch8
+
+./chip8 hex asm roms/games/Pong\ \(1\ player\).ch8
 
 http://emulator101.com/
 TODO: Read through it.

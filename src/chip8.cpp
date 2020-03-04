@@ -1,5 +1,6 @@
-#include "chip8.hpp"
 #include <cstdio>
+
+#include "chip8.hpp"
 
 // C-tors
 
@@ -15,7 +16,7 @@ ch8::Program::Program(int argc, char** argv)
     ParseBytes(os::ReadChip8File(arguments.path));
 }
 
-void ch8::Program::ParseBytes(std::vector<u8> bytes) noexcept {
+void ch8::Program::ParseBytes(std::vector<u8> bytes) {
     using std::make_unique;
 
     program.clear();
@@ -27,8 +28,22 @@ void ch8::Program::ParseBytes(std::vector<u8> bytes) noexcept {
     
         switch (l >> 4) {
         case 0x00:
-            program.push_back(make_unique<SystemInstruction>(state, l, r));
+            switch (r) {
+            case 0xe0:
+                program.push_back(make_unique<ClearScreenInstruction>(state, l, r));
+                break;
+            case 0xee:
+                program.push_back(make_unique<ReturnInstruction>(state, l, r));
+                break;
+
+            default:
+                // 0nnn: This instruction is only used on the old computers on which Chip-8 was originally implemented.
+                // It is ignored by modern interpreters.
+                program.push_back(make_unique<Instruction>(state, l, r));
+                break;
+            }
             break;
+
         case 0x01:
             program.push_back(make_unique<JumpInstruction>(state, l, r));
             break;
@@ -82,22 +97,19 @@ void ch8::Program::ParseBytes(std::vector<u8> bytes) noexcept {
     }
 }
 
-void ch8::Program::DumpHex() const {
-    if (program.size() < 2) {
+void ch8::Program::DumpHex() const noexcept {
+    if (program.size() == 0) {
         return;
     }
 
-    auto iter = program.cbegin();
-    auto handle = iter->get();
-    printf("%.4x:   %.2x%.2x ", State::MEM_START, handle->l, handle->r);
-    iter++;
-    u16 opCount = 1u;
+    auto handle = program[0].get();
+    printf("%.4x:   %.2x%.2x ", Chip8::MEM_START, handle->l, handle->r);
 
-    for (; iter != program.cend(); iter++, opCount++) {
-        handle = iter->get();
+    for (u32 i = 1u; i < program.size(); i++) {
+        handle = program[i].get();
 
-        if (opCount % 8 == 0u) {
-            printf("\n%.4x:   ", State::MEM_START + opCount * 2u);
+        if (i % 8 == 0u) {
+            printf("\n%.4x:   ", Chip8::MEM_START + i * 2u);
         }
 
         printf("%.2x%.2x ", handle->l, handle->r);
@@ -106,7 +118,7 @@ void ch8::Program::DumpHex() const {
     putchar('\n');
 }
 
-void ch8::Program::Execute() {
+void ch8::Program::Execute() noexcept {
     state.Reset();
 
     for (auto& instr: program) {
@@ -114,7 +126,7 @@ void ch8::Program::Execute() {
     }
 }
 
-void ch8::Program::Disassemble() {
+void ch8::Program::Disassemble() noexcept {
     state.Reset();
 
     for (const auto& instr: program) {

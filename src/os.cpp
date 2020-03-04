@@ -16,9 +16,11 @@ os::Arguments::Arguments(int count, char** args) {
     // Parse options
     for (int i = 1; i < count; ++i) {
         if (strcmp("hex", args[i]) == 0) {
-            options |= emu::OPTIONS_HEX;
+            options |= ch8::OPTIONS_HEX;
         } else if (strcmp("asm", args[i]) == 0) {
-            options |= emu::OPTIONS_CODE;
+            options |= ch8::OPTIONS_CODE;
+        } else if (strcmp("noexec", args[i]) == 0) {
+            options |= ch8::OPTIONS_NOEXEC;
         }
     }
 }

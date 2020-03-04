@@ -8,8 +8,7 @@
 
 // To the best of my knowledge, I will separate OS specific things here.
 namespace os {
-    class Arguments {
-    public:
+    struct Arguments {
         u32         options = 0;
         std::string path    = "";
 
@@ -19,6 +18,10 @@ namespace os {
             : options(options)
             , path(path != nullptr ? path : "")
         {}
+
+        inline bool IsEnabled(ch8::PROGRAM_OPTIONS opt) const noexcept {
+            return options & opt;
+        }
     };
 
     // We will assume that the file can be stored in memory all at once.
