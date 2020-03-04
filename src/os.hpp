@@ -19,7 +19,7 @@ namespace os {
             , path(path != nullptr ? path : "")
         {}
 
-        inline bool IsEnabled(ch8::PROGRAM_OPTIONS opt) const noexcept {
+        bool IsEnabled(ch8::PROGRAM_OPTIONS opt) const noexcept {
             return options & opt;
         }
     };

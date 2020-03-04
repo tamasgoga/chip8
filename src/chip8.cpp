@@ -4,13 +4,13 @@
 
 // C-tors
 
-ch8::Program::Program(const char* path, u32 options)
+ch8::Program::Program(const char *path, u32 options)
     : arguments(path, options)
 {
     ParseBytes(os::ReadChip8File(arguments.path));
 }
 
-ch8::Program::Program(int argc, char** argv)
+ch8::Program::Program(int argc, char **argv)
     : arguments(argc, argv)
 {
     ParseBytes(os::ReadChip8File(arguments.path));
@@ -25,7 +25,7 @@ void ch8::Program::ParseBytes(std::vector<u8> bytes) {
     for (std::vector<u8>::size_type i = 0; i < bytes.size(); i += 2) {
         u8 l = bytes[i];
         u8 r = bytes[i + 1];
-    
+
         switch (l >> 4) {
         case 0x00:
             switch (r) {
@@ -66,7 +66,39 @@ void ch8::Program::ParseBytes(std::vector<u8> bytes) {
             program.push_back(make_unique<AddInstruction>(state, l, r));
             break;
         case 0x08:
-            program.push_back(make_unique<RegisterInstruction>(state, l, r));
+            switch (GetRightNibble(r)) {
+            case 0x0:
+                program.push_back(make_unique<MoveRegisterInstruction>(state, l, r));
+                break;
+            case 0x1:
+                program.push_back(make_unique<OrInstruction>(state, l, r));
+                break;
+            case 0x2:
+                program.push_back(make_unique<AndInstruction>(state, l, r));
+                break;
+            case 0x3:
+                program.push_back(make_unique<XorInstruction>(state, l, r));
+                break;
+            case 0x4:
+                program.push_back(make_unique<AddRegisterInstruction>(state, l, r));
+                break;
+            case 0x5:
+                program.push_back(make_unique<SubInstruction>(state, l, r));
+                break;
+            case 0x6:
+                program.push_back(make_unique<ShiftRightInstruction>(state, l, r));
+                break;
+            case 0x7:
+                program.push_back(make_unique<SubInverseInstruction>(state, l, r));
+                break;
+            case 0xe:
+                program.push_back(make_unique<ShiftLeftInstruction>(state, l, r));
+                break;
+
+            default:
+                program.push_back(make_unique<Instruction>(state, l, r));
+                break;
+            }
             break;
         case 0x09:
             program.push_back(make_unique<SkipRegisterNotEqualInstruction>(state, l, r));
@@ -84,10 +116,53 @@ void ch8::Program::ParseBytes(std::vector<u8> bytes) {
             program.push_back(make_unique<DrawInstruction>(state, l, r));
             break;
         case 0x0e:
-            program.push_back(make_unique<SkipKeyInstruction>(state, l, r));
+            switch (r) {
+            case 0x9e:
+                program.push_back(make_unique<SkipKeyEqualsInstruction>(state, l, r));
+                break;
+            case 0xa1:
+                program.push_back(make_unique<SkipKeyNotEqualsInstruction>(state, l, r));
+                break;
+
+            default:
+                program.push_back(make_unique<Instruction>(state, l, r));
+                break;
+            }
             break;
         case 0x0f:
-            program.push_back(make_unique<FunInstruction>(state, l, r));
+            switch (r) {
+            case 0x07:
+                program.push_back(make_unique<GetDelayInstruction>(state, l, r));
+                break;
+            case 0x0a:
+                program.push_back(make_unique<GetKeyInstruction>(state, l, r));
+                break;
+            case 0x15:
+                program.push_back(make_unique<SetDelayInstruction>(state, l, r));
+                break;
+            case 0x18:
+                program.push_back(make_unique<SetSoundInstruction>(state, l, r));
+                break;
+            case 0x1e:
+                program.push_back(make_unique<AddToAddressInstruction>(state, l, r));
+                break;
+            case 0x29:
+                program.push_back(make_unique<SetSpriteInstruction>(state, l, r));
+                break;
+            case 0x33:
+                program.push_back(make_unique<SetBcdInstruction>(state, l, r));
+                break;
+            case 0x55:
+                program.push_back(make_unique<SaveRegistersInstruction>(state, l, r));
+                break;
+            case 0x65:
+                program.push_back(make_unique<LoadRegistersInstruction>(state, l, r));
+                break;
+
+            default:
+                program.push_back(make_unique<Instruction>(state, l, r));
+                break;
+            }
             break;
 
         default:
@@ -121,7 +196,7 @@ void ch8::Program::DumpHex() const noexcept {
 void ch8::Program::Execute() noexcept {
     state.Reset();
 
-    for (auto& instr: program) {
+    for (auto &instr: program) {
         instr->Execute();
     }
 }
@@ -129,7 +204,7 @@ void ch8::Program::Execute() noexcept {
 void ch8::Program::Disassemble() noexcept {
     state.Reset();
 
-    for (const auto& instr: program) {
+    for (const auto &instr: program) {
         instr->Disassemble();
         putchar('\n');
         state.pc += 2;

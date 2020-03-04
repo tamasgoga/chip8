@@ -34,26 +34,34 @@ namespace ch8 {
         }
     };
 
+    // Bit twiddling
+    inline u8 GetRightNibble(u8 x) { return x & 0x0f; }
+    inline u8 GetLeftNibble(u8 x)  { return (x & 0xf0) >> 4;}
+
     // Base instruction.
     class Instruction {
-    protected:
-        ch8::Chip8& state;
-
     public:
         const u8 l, r;
 
         Instruction(Chip8& state, u8 left, u8 right)
-            : state(state)
-            , l(left)
+            : l(left)
             , r(right)
+            , state(state)
         {}
 
         virtual ~Instruction() {}
+
+        u16 Get16BitAddress() const noexcept {
+            return ((u16(l) & 0x00f) << 8) | r;
+        }
 
         void PrintInstruction(const char* name) const noexcept;
 
         virtual void Execute() noexcept;
         virtual void Disassemble() noexcept;
+
+    protected:
+        Chip8& state;
     };
 
     // 0x0
@@ -128,9 +136,65 @@ namespace ch8 {
     };
 
     // 0x8
-    class RegisterInstruction: public Instruction {
+    class MoveRegisterInstruction: public Instruction {
     public:
-        RegisterInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        MoveRegisterInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class OrInstruction: public Instruction {
+    public:
+        OrInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class AndInstruction: public Instruction {
+    public:
+        AndInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class XorInstruction: public Instruction {
+    public:
+        XorInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class AddRegisterInstruction: public Instruction {
+    public:
+        AddRegisterInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class SubInstruction: public Instruction {
+    public:
+        SubInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class ShiftRightInstruction: public Instruction {
+    public:
+        ShiftRightInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class SubInverseInstruction: public Instruction {
+    public:
+        SubInverseInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class ShiftLeftInstruction: public Instruction {
+    public:
+        ShiftLeftInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
         void Disassemble() noexcept override;
     };
@@ -176,17 +240,80 @@ namespace ch8 {
     };
 
     // 0xE
-    class SkipKeyInstruction: public Instruction {
+    class SkipKeyEqualsInstruction: public Instruction {
     public:
-        SkipKeyInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        SkipKeyEqualsInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class SkipKeyNotEqualsInstruction: public Instruction {
+    public:
+        SkipKeyNotEqualsInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
         void Disassemble() noexcept override;
     };
 
     // 0xF -- F stands for Fun!
-    class FunInstruction: public Instruction {
+    class GetDelayInstruction: public Instruction {
     public:
-        FunInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        GetDelayInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class GetKeyInstruction: public Instruction {
+    public:
+        GetKeyInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class SetDelayInstruction: public Instruction {
+    public:
+        SetDelayInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class SetSoundInstruction: public Instruction {
+    public:
+        SetSoundInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class AddToAddressInstruction: public Instruction {
+    public:
+        AddToAddressInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class SetSpriteInstruction: public Instruction {
+    public:
+        SetSpriteInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class SetBcdInstruction: public Instruction {
+    public:
+        SetBcdInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class SaveRegistersInstruction: public Instruction {
+    public:
+        SaveRegistersInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        void Execute() noexcept override;
+        void Disassemble() noexcept override;
+    };
+
+    class LoadRegistersInstruction: public Instruction {
+    public:
+        LoadRegistersInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
         void Disassemble() noexcept override;
     };
@@ -201,6 +328,12 @@ Extra Super Chip-48 stuff:
 00FD - EXIT
 00FE - LOW
 00FF - HIGH
+
+Dxy0 - DRW Vx, Vy, 0
+
+Fx30 - LD HF, Vx
+Fx75 - LD R, Vx
+Fx85 - LD Vx, R
 */
 
 #endif // GOGA_TAMAS_CHIP_8_INSTRUCTIONS_HPP
