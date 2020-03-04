@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+// Commonly used definitions.
+
 using i8  = int_least8_t;
 using i16 = int_least16_t;
 using i32 = int_least32_t;

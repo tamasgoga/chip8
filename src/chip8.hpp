@@ -12,20 +12,19 @@ namespace ch8 {
 
         const os::Arguments arguments;
         
-        Program(const char* path, u32 options);
-        Program(int argc, char** argv);
+        Program(ch8::Chip8& state, const char* path, u32 options);
+        Program(ch8::Chip8& state, int argc, char** argv);
 
         void DumpHex() const noexcept;
 
-        // Both change the state.
         void Disassemble() noexcept;
         void Execute() noexcept;
 
     private:
         void ParseBytes(std::vector<u8> bytes);
 
+        Chip8& state;
         instruction_vector program;
-        Chip8 state;
     };
 }
 

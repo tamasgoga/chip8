@@ -4,14 +4,17 @@
 
 // C-tors
 
-ch8::Program::Program(const char *path, u32 options)
+ch8::Program::Program(ch8::Chip8& state, const char *path, u32 options)
     : arguments(path, options)
+    , state(state)
+
 {
     ParseBytes(os::ReadChip8File(arguments.path));
 }
 
-ch8::Program::Program(int argc, char **argv)
+ch8::Program::Program(ch8::Chip8& state, int argc, char **argv)
     : arguments(argc, argv)
+    , state(state)
 {
     ParseBytes(os::ReadChip8File(arguments.path));
 }

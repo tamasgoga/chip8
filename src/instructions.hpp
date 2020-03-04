@@ -7,7 +7,10 @@
 
 #include "defines.hpp"
 
+// Contains the Chip-8's CPU layout & all of its instructions.
+
 namespace ch8 {
+    // The Chip-8's CPU.
     struct Chip8 {
         static const u16 MEM_START    = 0x200;
         static const u16 STACK_START  = 0xfa0;
@@ -17,8 +20,8 @@ namespace ch8 {
         u16                    i;      // address register
         u16                    sp;     // stack pointer
         u16                    pc;     // program counter
-        u8                     delay;  //
-        u8                     sound;  //
+        u8                     dt;     // delay timer
+        u8                     st;     // sound timer
         std::array<u8, 4096>   memory; //
         // u8*                    screen; // points to memory[0xF00]
 
@@ -27,14 +30,13 @@ namespace ch8 {
         }
 
         void Reset() {
-            // memory.fill(1u); // probably not required
             // screen = memory[SCREEN_START];
             sp = STACK_START;
             pc = MEM_START;
         }
     };
 
-    // Bit twiddling
+    // Bit twiddling.
     inline u8 GetRightNibble(u8 x) { return x & 0x0f; }
     inline u8 GetLeftNibble(u8 x)  { return (x & 0xf0) >> 4;}
 

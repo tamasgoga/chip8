@@ -7,6 +7,7 @@
 #include "defines.hpp"
 
 // To the best of my knowledge, I will separate OS specific things here.
+
 namespace os {
     struct Arguments {
         u32         options = 0;
