@@ -2,10 +2,6 @@
 
 #include "instructions.hpp"
 
-// Constants
-
-static constexpr u16 MEM_START = 0x200;
-
 // Bit twiddling
 
 // rename to getRightNibble, getLeftNibble
@@ -18,85 +14,16 @@ static inline u16 get16BitAddress (u8 x, u8 y) {
 
 // Instructions
 
-void ch8::Instruction::PrintInstruction(u16 i, const char* name) const noexcept {
-    printf("%.4x:   <%.2x%.2x>   %-8s ", MEM_START + i * 2, l, r, name);
+void ch8::Instruction::PrintInstruction(const char* name) const noexcept {
+    printf("%.4x:   <%.2x%.2x>   %-8s ", state.pc, l, r, name);
 }
 
 void ch8::Instruction::Execute() noexcept {
     printf("<pc = %.4x> Unknown instruction, nothing executed.\n", this->state.pc);
 }
 
-void ch8::Instruction::Disassemble(u16 i) const noexcept {
-    PrintInstruction(i, "; unknown");
-}
-
-std::vector<std::unique_ptr<ch8::Instruction>> ch8::ParseBytes(State state, std::vector<u8> bytes) noexcept {
-    using std::make_unique;
-
-    auto program = std::vector<std::unique_ptr<Instruction>>();
-    program.reserve(bytes.size() / 2u);
-
-    for (std::vector<u8>::size_type i = 0; i < bytes.size(); i += 2) {
-        u8 l = bytes[i];
-        u8 r = bytes[i + 1];
-    
-        switch (l >> 4) {
-        case 0x00:
-            program.push_back(make_unique<SystemInstruction>(state, l, r));
-            break;
-        case 0x01:
-            program.push_back(make_unique<JumpInstruction>(state, l, r));
-            break;
-        case 0x02:
-            program.push_back(make_unique<CallInstruction>(state, l, r));
-            break;
-        case 0x03:
-            program.push_back(make_unique<SkipEqualInstruction>(state, l, r));
-            break;
-        case 0x04:
-            program.push_back(make_unique<SkipNotEqualInstruction>(state, l, r));
-            break;
-        case 0x05:
-            program.push_back(make_unique<SkipRegisterEqualInstruction>(state, l, r));
-            break;
-        case 0x06:
-            program.push_back(make_unique<MoveInstruction>(state, l, r));
-            break;
-        case 0x07:
-            program.push_back(make_unique<AddInstruction>(state, l, r));
-            break;
-        case 0x08:
-            program.push_back(make_unique<RegisterInstruction>(state, l, r));
-            break;
-        case 0x09:
-            program.push_back(make_unique<SkipRegisterNotEqualInstruction>(state, l, r));
-            break;
-        case 0x0a:
-            program.push_back(make_unique<MoveAddressInstruction>(state, l, r));
-            break;
-        case 0x0b:
-            program.push_back(make_unique<JumpRegisterInstruction>(state, l, r));
-            break;
-        case 0x0c:
-            program.push_back(make_unique<RandomMaskInstruction>(state, l, r));
-            break;
-        case 0x0d:
-            program.push_back(make_unique<DrawInstruction>(state, l, r));
-            break;
-        case 0x0e:
-            program.push_back(make_unique<SkipKeyInstruction>(state, l, r));
-            break;
-        case 0x0f:
-            program.push_back(make_unique<FunInstruction>(state, l, r));
-            break;
-
-        default:
-            program.push_back(make_unique<Instruction>(state, l, r));
-            break;
-        }
-    }
-
-    return program;
+void ch8::Instruction::Disassemble() const noexcept {
+    PrintInstruction("; unknown");
 }
 
 
@@ -104,20 +31,20 @@ std::vector<std::unique_ptr<ch8::Instruction>> ch8::ParseBytes(State state, std:
 
 void ch8::SystemInstruction::Execute() noexcept {}
 
-void ch8::SystemInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SystemInstruction::Disassemble() const noexcept {
     // clear screen, return, sys calls
     switch (r) {
     case 0xe0:
-        PrintInstruction(i, "CLS");
+        PrintInstruction("CLS");
         break;
     case 0xee:
-        PrintInstruction(i ,"RET");
+        PrintInstruction("RET");
         break;
     default: {
             // 0nnn: This instruction is only used on the old computers on which Chip-8 was originally implemented.
             // It is ignored by modern interpreters.
             u16 nnn = get16BitAddress(l, r);
-            PrintInstruction(i, "SYS");
+            PrintInstruction("SYS");
             printf("%X", nnn);
         }
         break;
@@ -139,9 +66,9 @@ void ch8::SystemInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::JumpInstruction::Execute() noexcept {}
 
-void ch8::JumpInstruction::Disassemble(u16 i) const noexcept {
+void ch8::JumpInstruction::Disassemble() const noexcept {
     u16 nnn = get16BitAddress(l, r);
-    PrintInstruction(i, "JMP");
+    PrintInstruction("JMP");
     printf("%X", nnn);
 }
 
@@ -150,9 +77,9 @@ void ch8::JumpInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::CallInstruction::Execute() noexcept {}
 
-void ch8::CallInstruction::Disassemble(u16 i) const noexcept {
+void ch8::CallInstruction::Disassemble() const noexcept {
     u16 nnn = get16BitAddress(l, r);
-    PrintInstruction(i, "CALL");
+    PrintInstruction("CALL");
     printf("%X", nnn);
 }
 
@@ -162,10 +89,10 @@ void ch8::CallInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::SkipEqualInstruction::Execute() noexcept {}
 
-void ch8::SkipEqualInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipEqualInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
-    PrintInstruction(i, "SE");
+    PrintInstruction("SE");
     printf("V%X, %d", vx, nn);
 }
 
@@ -174,10 +101,10 @@ void ch8::SkipEqualInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::SkipNotEqualInstruction::Execute() noexcept {}
 
-void ch8::SkipNotEqualInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipNotEqualInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
-    PrintInstruction(i, "SNE");
+    PrintInstruction("SNE");
     printf("V%X, %d", vx, nn);
 }
 
@@ -186,10 +113,10 @@ void ch8::SkipNotEqualInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::SkipRegisterEqualInstruction::Execute() noexcept {}
 
-void ch8::SkipRegisterEqualInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipRegisterEqualInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
     u8 vy= getLeftNibble(r);
-    PrintInstruction(i, "SRE");
+    PrintInstruction("SRE");
     printf("V%X, V%X", vx, vy);
 }
 
@@ -198,10 +125,10 @@ void ch8::SkipRegisterEqualInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::MoveInstruction::Execute() noexcept {}
 
-void ch8::MoveInstruction::Disassemble(u16 i) const noexcept {
+void ch8::MoveInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
-    PrintInstruction(i, "MOV");
+    PrintInstruction("MOV");
     printf("V%X, %d", vx, nn);
 }
 
@@ -210,10 +137,10 @@ void ch8::MoveInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::AddInstruction::Execute() noexcept {}
 
-void ch8::AddInstruction::Disassemble(u16 i) const noexcept {
+void ch8::AddInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
-    PrintInstruction(i, "ADD");
+    PrintInstruction("ADD");
     printf("V%X, %d", vx, nn);
 }
 
@@ -221,58 +148,58 @@ void ch8::AddInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::RegisterInstruction::Execute() noexcept {}
 
-void ch8::RegisterInstruction::Disassemble(u16 i) const noexcept {
+void ch8::RegisterInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
     u8 vy = getLeftNibble(r);
 
     switch (r & 0x0f) {
     case 0x0:
         // 8xy0: Vx = Vy; Sets Vx to the value of Vy.
-        PrintInstruction(i, "MOVR");
+        PrintInstruction("MOVR");
         printf("V%X, V%X", vx, vy);
         break;
     case 0x1:
         // 8xy1: Vx |= Vy; Sets Vx to Vx or Vy. (Bitwise OR operation)
-        PrintInstruction(i, "OR");
+        PrintInstruction("OR");
         printf("V%X, V%X", vx, vy);
         break;
     case 0x2:
         // 8xy2: Vx &= Vy; Sets Vx to Vx and Vy. (Bitwise AND operation)
-        PrintInstruction(i, "AND");
+        PrintInstruction("AND");
         printf("V%X, V%X", vx, vy);
         break;
     case 0x3:
         // 8xy3: Vx ^= Vy; Sets Vx to Vx xor Vy.
-        PrintInstruction(i, "XOR");
+        PrintInstruction("XOR");
         printf("V%X, V%X", vx, vy);
         break;
     case 0x4:
         // 8xy4: Vx += Vy; Adds Vxy to Vy. Vf is set to 1 when there's a carry, and to 0 when there isn't.
-        PrintInstruction(i, "ADDR");
+        PrintInstruction("ADDR");
         printf("V%X, V%X", vx, vy);
         break;
     case 0x5:
         // 8xy5: Vx -= Vy; Vy is subtracted from Vx. Vf is set to 0 when there's a borrow, and 1 when there isn't.
-        PrintInstruction(i, "SUB");
+        PrintInstruction("SUB");
         printf("V%X, V%X", vx, vy);
         break;
     case 0x6:
         // 8xy6: Vx >>= 1; Stores the least significant bit of Vx in Vf and then shifts Vx to the right by 1.
-        PrintInstruction(i, "SHR");
+        PrintInstruction("SHR");
         printf("V%X", vx);
         break;
     case 0x7:
         // 8xy7: Vx = Vy - Vx; Sets Vx to Vy minus Vx. Vf is set to 0 when there's a borrow, and 1 when there isn't.
-        PrintInstruction(i, "SUBINV");
+        PrintInstruction("SUBINV");
         printf("V%X, V%X", vx, vy);
         break;
     case 0xe:
         // 8xyE: Vx <<= 1; Stores the most significant bit of Vx in Vf and then shifts Vx to the left by 1.
-        PrintInstruction(i, "SHL");
+        PrintInstruction("SHL");
         printf("V%X", vx);
         break;
     default:
-        PrintInstruction(i, "; unknown (8)");
+        PrintInstruction("; unknown (8)");
         break;
     }
 }
@@ -282,10 +209,10 @@ void ch8::RegisterInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::SkipRegisterNotEqualInstruction::Execute() noexcept {}
 
-void ch8::SkipRegisterNotEqualInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipRegisterNotEqualInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
     u8 vy = getLeftNibble(r);
-    PrintInstruction(i, "SRNE");
+    PrintInstruction("SRNE");
     printf("V%X, V%X", vx, vy);
 }
 
@@ -294,9 +221,9 @@ void ch8::SkipRegisterNotEqualInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::MoveAddressInstruction::Execute() noexcept {}
 
-void ch8::MoveAddressInstruction::Disassemble(u16 i) const noexcept {
+void ch8::MoveAddressInstruction::Disassemble() const noexcept {
     u16 nnn = get16BitAddress(l, r);
-    PrintInstruction(i, "MOVI");
+    PrintInstruction("MOVI");
     printf("%X", nnn);
 }
 
@@ -305,9 +232,9 @@ void ch8::MoveAddressInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::JumpRegisterInstruction::Execute() noexcept {}
 
-void ch8::JumpRegisterInstruction::Disassemble(u16 i) const noexcept {
+void ch8::JumpRegisterInstruction::Disassemble() const noexcept {
     i16 nnn = get16BitAddress(l, r);
-    PrintInstruction(i, "JMPV");
+    PrintInstruction("JMPV");
     printf("%X", nnn);
 }
 
@@ -316,10 +243,10 @@ void ch8::JumpRegisterInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::RandomMaskInstruction::Execute() noexcept {}
 
-void ch8::RandomMaskInstruction::Disassemble(u16 i) const noexcept {
+void ch8::RandomMaskInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
     u8 nn = r;
-    PrintInstruction(i, "RNDMSK");
+    PrintInstruction("RNDMSK");
     printf("V%X, V%u", vx, nn);
 }
 
@@ -331,11 +258,11 @@ void ch8::RandomMaskInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::DrawInstruction::Execute() noexcept {}
 
-void ch8::DrawInstruction::Disassemble(u16 i) const noexcept {
+void ch8::DrawInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
     u8 vy = getLeftNibble(r);
     u8 n = getRightNibble(r);
-    PrintInstruction(i, "DRAW");
+    PrintInstruction("DRAW");
     printf("V%X, V%X, %.2u", vx, vy, n);
 
     // Super Chip-48: Dxy0 - DRW Vx, Vy, 0
@@ -346,22 +273,22 @@ void ch8::DrawInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::SkipKeyInstruction::Execute() noexcept {}
 
-void ch8::SkipKeyInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipKeyInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
 
     switch (r) {
     case 0x9e:
         // Ex9E: if(key() == Vx); Skips the next instruction if the key stored in Vx is pressed.
-        PrintInstruction(i, "SKE");
+        PrintInstruction("SKE");
         printf("V%X", vx);
         break;
     case 0xa1:
         // ExA1; if(key() != Vx); Skips the next instruction if the key stored in Vx isn't pressed.
-        PrintInstruction(i, "SKNE");
+        PrintInstruction("SKNE");
         printf("V%X", vx);
         break;
     default:
-        PrintInstruction(i, "; unknown (E)");
+        PrintInstruction("; unknown (E)");
         break;
     }
 }
@@ -371,40 +298,40 @@ void ch8::SkipKeyInstruction::Disassemble(u16 i) const noexcept {
 
 void ch8::FunInstruction::Execute() noexcept {}
 
-void ch8::FunInstruction::Disassemble(u16 i) const noexcept {
+void ch8::FunInstruction::Disassemble() const noexcept {
     u8 vx = getRightNibble(l);
 
     switch (r) {
     case 0x07:
         // Fx07: Vx = get_delay(); Sets Vx to the value of the delay timer.
-        PrintInstruction(i, "GETDLY");
+        PrintInstruction("GETDLY");
         printf("V%X", vx);
         break;
     case 0x0a:
         // Fx0A: Vx = get_key(); A key press is awaited, and then stored in Vx.
         // (Blocking Operation. All instruction halted until next key event)
-        PrintInstruction(i, "GETKEY");
+        PrintInstruction("GETKEY");
         printf("V%X", vx);
         break;
     case 0x15:
         // Fx15: delay_timer(Vx); Sets the delay timer to Vx.
-        PrintInstruction(i, "SETDLY");
+        PrintInstruction("SETDLY");
         printf("V%X", vx);
         break;
     case 0x18:
         // Fx18: sound_timer(Vx); Sets the sound timer to VX.
-        PrintInstruction(i, "SETSND");
+        PrintInstruction("SETSND");
         printf("V%X", vx);
         break;
     case 0x1e:
         // Fx1E: I += Vx; Adds Vx to i. Vf is set to 1 when there is a range overflow (I + Vx > 0xFFF), and to 0 when there isn't.
-        PrintInstruction(i, "ADDI");
+        PrintInstruction("ADDI");
         printf("V%X", vx);
         break;
     case 0x29:
         // Fx29: I = sprite_addr[Vx]; Sets I to the location of the sprite for the character in Vx.
         // Characters 0-F (in hexadecimal) are represented by a 4x5 font.
-        PrintInstruction(i, "DRAW");
+        PrintInstruction("DRAW");
         printf("V%X", vx);
         break;
     case 0x33:
@@ -419,23 +346,23 @@ void ch8::FunInstruction::Disassemble(u16 i) const noexcept {
         (In other words, take the decimal representation of Vx, place the hundreds digit in memory at location in i,
         the tens digit at location i+1, and the ones digit at location i+2.)
         */
-        PrintInstruction(i, "BCD");
+        PrintInstruction("BCD");
         printf("V%X", vx);
         break;
     case 0x55:
         // Fx55: reg_dump(Vx, &i); Stores V0 to Vx (including Vx) in memory starting at address i.
         // The offset from i is increased by 1 for each value written, but i itself is left unmodified.
-        PrintInstruction(i, "SAVE");
+        PrintInstruction("SAVE");
         printf("V%X", vx);
         break;
     case 0x65:
         // Fx65: reg_load(Vx, &i); Fills V0 to Vx (including Vx) with values from memory starting at address i.
         // The offset from i is increased by 1 for each value written, but i itself is left unmodified.
-        PrintInstruction(i, "LOAD");
+        PrintInstruction("LOAD");
         printf("V%X", vx);
         break;
     default:
-        PrintInstruction(i, "; unknown (F)");
+        PrintInstruction("; unknown (F)");
         break;
     }
 

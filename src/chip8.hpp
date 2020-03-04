@@ -8,15 +8,20 @@ namespace ch8 {
     class Program {
     public:
         using size_type = std::vector<Instruction>::size_type;
+
         const os::Arguments arguments;
         
         Program(const char* path, u32 options);
         Program(int argc, char** argv);
 
         void DumpHex() const;
-        void Disassemble() const;
+
+        void Disassemble();
+        void Execute();
 
     private:
+        void ParseBytes(std::vector<u8> bytes) noexcept;
+
         std::vector<std::unique_ptr<Instruction>> program;
         State state;
     };

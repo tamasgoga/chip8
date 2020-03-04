@@ -8,7 +8,12 @@
 #include "defines.hpp"
 
 namespace ch8 {
+    // Used as a struct, since the purpose is to modify its properties directly, without the use of methods.
     struct State {
+        static const u16 MEM_START    = 0x200;
+        static const u16 STACK_START  = 0xfa0;
+        static const u16 SCREEN_START = 0xf00;
+
         std::array<u8, 16>     v;      // registers
         u16                    i;      // address register
         u16                    sp;     // stack pointer
@@ -19,10 +24,14 @@ namespace ch8 {
         // u8*                    screen; // points to memory[0xF00]
 
         State() {
-            memory.fill(1u);
-            // screen = memory[0xf00];    
-            sp = 0xfa0;    
-            pc = 0x200;  
+            Reset();
+        }
+
+        void Reset() {
+            // memory.fill(1u); // probably not required
+            // screen = memory[SCREEN_START];
+            sp = STACK_START;
+            pc = MEM_START;
         }
     };
 
@@ -43,19 +52,17 @@ namespace ch8 {
         virtual ~Instruction() {}
 
         virtual void Execute() noexcept;
-        virtual void Disassemble(u16 i) const noexcept;
+        virtual void Disassemble() const noexcept;
 
-        void PrintInstruction(u16 i, const char* name) const noexcept;
+        void PrintInstruction(const char* name) const noexcept;
     };
-
-    std::vector<std::unique_ptr<Instruction>> ParseBytes(State state, std::vector<u8> bytes) noexcept;
 
     // 0x0
     class SystemInstruction: public Instruction {
     public:
         SystemInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0x1
@@ -63,7 +70,7 @@ namespace ch8 {
     public:
         JumpInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
 
@@ -72,7 +79,7 @@ namespace ch8 {
     public:
         CallInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0x3
@@ -80,7 +87,7 @@ namespace ch8 {
     public:
         SkipEqualInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0x4
@@ -88,7 +95,7 @@ namespace ch8 {
     public:
         SkipNotEqualInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0x5
@@ -96,7 +103,7 @@ namespace ch8 {
     public:
         SkipRegisterEqualInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0x6
@@ -104,7 +111,7 @@ namespace ch8 {
     public:
         MoveInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0x7
@@ -112,7 +119,7 @@ namespace ch8 {
     public:
         AddInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0x8
@@ -120,7 +127,7 @@ namespace ch8 {
     public:
         RegisterInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0x9
@@ -128,7 +135,7 @@ namespace ch8 {
     public:
         SkipRegisterNotEqualInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0xA
@@ -136,7 +143,7 @@ namespace ch8 {
     public:
         MoveAddressInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0xB
@@ -144,7 +151,7 @@ namespace ch8 {
     public:
         JumpRegisterInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0xC
@@ -152,7 +159,7 @@ namespace ch8 {
     public:
         RandomMaskInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0xD
@@ -160,7 +167,7 @@ namespace ch8 {
     public:
         DrawInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0xE
@@ -168,7 +175,7 @@ namespace ch8 {
     public:
         SkipKeyInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 
     // 0xF -- F stands for Fun!
@@ -176,7 +183,7 @@ namespace ch8 {
     public:
         FunInstruction(State& s, u8 l, u8 r): Instruction(s,l,r) {}
         void Execute() noexcept override;
-        void Disassemble(u16 i) const noexcept override;
+        void Disassemble() const noexcept override;
     };
 }
 
