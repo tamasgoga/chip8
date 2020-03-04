@@ -5,9 +5,9 @@
 #include <vector>
 #include <memory>
 
-#include "def.hpp"
+#include "defines.hpp"
 
-namespace emu {
+namespace ch8 {
     struct State {
         std::array<u8, 16>     v;      // registers
         u16                    i;      // address register
@@ -29,7 +29,7 @@ namespace emu {
     // Base instruction.
     class Instruction {
     protected:
-        emu::State& state;
+        ch8::State& state;
 
     public:
         const u8 l, r;

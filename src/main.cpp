@@ -10,7 +10,7 @@ void Run(int argc, char** argv) {
     using std::cout;
     using std::endl;
 
-    emu::Program program(argc, argv);
+    ch8::Program program(argc, argv);
 
     if (program.arguments.path.empty()) {
         cout << "Usage: chip8 <options> path_to_rom" << endl;
@@ -41,7 +41,7 @@ int QuickTest(int argc, char** argv) {
     using std::cout;
     using std::endl;
 
-    emu::Program program("roms/games/Paddles.ch8", 1);
+    ch8::Program program("roms/games/Paddles.ch8", 1);
     // emu::Program program("roms/programs/SQRT Test [Sergey Naydenov, 2010].ch8", 1);
     cout << os::GetFileError() << endl;
 

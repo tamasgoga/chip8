@@ -2,9 +2,9 @@
 #define GOGA_TAMAS_CHIP_8_CHIP8_HPP
 
 #include "os.hpp"
-#include "instr.hpp"
+#include "instructions.hpp"
 
-namespace emu {
+namespace ch8 {
     class Program {
     public:
         using size_type = std::vector<Instruction>::size_type;

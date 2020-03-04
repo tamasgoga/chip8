@@ -1,5 +1,5 @@
-#ifndef GOGA_TAMAS_CHIP_8_DEF_HPP
-#define GOGA_TAMAS_CHIP_8_DEF_HPP
+#ifndef GOGA_TAMAS_CHIP_8_DEFINES_HPP
+#define GOGA_TAMAS_CHIP_8_DEFINES_HPP
 
 #include <cstdint>
 
@@ -20,4 +20,4 @@ namespace emu {
     };
 }
 
-#endif // GOGA_TAMAS_CHIP_8_DEF_HPP
+#endif // GOGA_TAMAS_CHIP_8_DEFINES_HPP

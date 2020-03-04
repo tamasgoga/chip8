@@ -1,6 +1,5 @@
-#include <iostream>
-
 #include "chip8.hpp"
+#include <cstdio>
 
 // Constants
 
@@ -8,20 +7,20 @@ static constexpr u16 MEM_START = 0x200;
 
 // C-tors
 
-emu::Program::Program(const char* path, u32 options)
+ch8::Program::Program(const char* path, u32 options)
     : arguments(path, options)
 {
     program = ParseBytes(state, os::ReadChip8File(arguments.path));
 }
 
-emu::Program::Program(int argc, char** argv)
+ch8::Program::Program(int argc, char** argv)
     : arguments(argc, argv)
 {
     program = ParseBytes(state, os::ReadChip8File(arguments.path));
 }
 
 // Dump program hexa
-void emu::Program::DumpHex() const {
+void ch8::Program::DumpHex() const {
     if (program.size() < 2) {
         return;
     }
@@ -46,7 +45,7 @@ void emu::Program::DumpHex() const {
 }
 
 // Disassemble program
-void emu::Program::Disassemble() const {
+void ch8::Program::Disassemble() const {
     for (size_type i = 0; i < program.size(); ++i) {
         program[i]->Disassemble(i);
         putchar('\n');

@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "instr.hpp"
+#include "instructions.hpp"
 
 // Constants
 
@@ -18,17 +18,19 @@ static inline u16 get16BitAddress (u8 x, u8 y) {
 
 // Instructions
 
-void emu::Instruction::PrintInstruction(u16 i, const char* name) const noexcept {
+void ch8::Instruction::PrintInstruction(u16 i, const char* name) const noexcept {
     printf("%.4x:   <%.2x%.2x>   %-8s ", MEM_START + i * 2, l, r, name);
 }
 
-void emu::Instruction::Execute() noexcept {}
+void ch8::Instruction::Execute() noexcept {
+    printf("<pc = %.4x> Unknown instruction, nothing executed.\n", this->state.pc);
+}
 
-void emu::Instruction::Disassemble(u16 i) const noexcept {
+void ch8::Instruction::Disassemble(u16 i) const noexcept {
     PrintInstruction(i, "; unknown");
 }
 
-std::vector<std::unique_ptr<emu::Instruction>> emu::ParseBytes(State state, std::vector<u8> bytes) noexcept {
+std::vector<std::unique_ptr<ch8::Instruction>> ch8::ParseBytes(State state, std::vector<u8> bytes) noexcept {
     using std::make_unique;
 
     auto program = std::vector<std::unique_ptr<Instruction>>();
@@ -100,9 +102,9 @@ std::vector<std::unique_ptr<emu::Instruction>> emu::ParseBytes(State state, std:
 
 // 0x0: Sys calls.
 
-void emu::SystemInstruction::Execute() noexcept {}
+void ch8::SystemInstruction::Execute() noexcept {}
 
-void emu::SystemInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SystemInstruction::Disassemble(u16 i) const noexcept {
     // clear screen, return, sys calls
     switch (r) {
     case 0xe0:
@@ -135,9 +137,9 @@ void emu::SystemInstruction::Disassemble(u16 i) const noexcept {
 
 // 1nnn: goto nnn; Jumps to address nnn.
 
-void emu::JumpInstruction::Execute() noexcept {}
+void ch8::JumpInstruction::Execute() noexcept {}
 
-void emu::JumpInstruction::Disassemble(u16 i) const noexcept {
+void ch8::JumpInstruction::Disassemble(u16 i) const noexcept {
     u16 nnn = get16BitAddress(l, r);
     PrintInstruction(i, "JMP");
     printf("%X", nnn);
@@ -146,9 +148,9 @@ void emu::JumpInstruction::Disassemble(u16 i) const noexcept {
 
 // 2nnn: *(nnn)(); Calls subroutine at nnn.
 
-void emu::CallInstruction::Execute() noexcept {}
+void ch8::CallInstruction::Execute() noexcept {}
 
-void emu::CallInstruction::Disassemble(u16 i) const noexcept {
+void ch8::CallInstruction::Disassemble(u16 i) const noexcept {
     u16 nnn = get16BitAddress(l, r);
     PrintInstruction(i, "CALL");
     printf("%X", nnn);
@@ -158,9 +160,9 @@ void emu::CallInstruction::Disassemble(u16 i) const noexcept {
 // 3xnn: if(Vx == nn); Skips the next instruction if Vx equals nn.
 // Usually the next instruction is a jump to skip a code block. Applies for 4, 5 & 9, too.
 
-void emu::SkipEqualInstruction::Execute() noexcept {}
+void ch8::SkipEqualInstruction::Execute() noexcept {}
 
-void emu::SkipEqualInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipEqualInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
     PrintInstruction(i, "SE");
@@ -170,9 +172,9 @@ void emu::SkipEqualInstruction::Disassemble(u16 i) const noexcept {
 
 // 4xnn: if(Vx != nn); Skips the next instruction if Vx doesn't equal nn.
 
-void emu::SkipNotEqualInstruction::Execute() noexcept {}
+void ch8::SkipNotEqualInstruction::Execute() noexcept {}
 
-void emu::SkipNotEqualInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipNotEqualInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
     PrintInstruction(i, "SNE");
@@ -182,9 +184,9 @@ void emu::SkipNotEqualInstruction::Disassemble(u16 i) const noexcept {
 
 // 5xy0: if(Vx == Vy); Skips the next instruction if Vx equals Vy.
 
-void emu::SkipRegisterEqualInstruction::Execute() noexcept {}
+void ch8::SkipRegisterEqualInstruction::Execute() noexcept {}
 
-void emu::SkipRegisterEqualInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipRegisterEqualInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
     u8 vy= getLeftNibble(r);
     PrintInstruction(i, "SRE");
@@ -194,9 +196,9 @@ void emu::SkipRegisterEqualInstruction::Disassemble(u16 i) const noexcept {
 
 // 6xnn: Vx = nn; Sets VX to NN.
 
-void emu::MoveInstruction::Execute() noexcept {}
+void ch8::MoveInstruction::Execute() noexcept {}
 
-void emu::MoveInstruction::Disassemble(u16 i) const noexcept {
+void ch8::MoveInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
     PrintInstruction(i, "MOV");
@@ -206,9 +208,9 @@ void emu::MoveInstruction::Disassemble(u16 i) const noexcept {
 
 // 7xnn: Vx += nn; Adds nn to Vx. (Carry flag is not changed.)
 
-void emu::AddInstruction::Execute() noexcept {}
+void ch8::AddInstruction::Execute() noexcept {}
 
-void emu::AddInstruction::Disassemble(u16 i) const noexcept {
+void ch8::AddInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
     i8 nn = r;
     PrintInstruction(i, "ADD");
@@ -217,9 +219,9 @@ void emu::AddInstruction::Disassemble(u16 i) const noexcept {
 
 // 8xyk: Register operations.
 
-void emu::RegisterInstruction::Execute() noexcept {}
+void ch8::RegisterInstruction::Execute() noexcept {}
 
-void emu::RegisterInstruction::Disassemble(u16 i) const noexcept {
+void ch8::RegisterInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
     u8 vy = getLeftNibble(r);
 
@@ -278,9 +280,9 @@ void emu::RegisterInstruction::Disassemble(u16 i) const noexcept {
 
 // 9xy0: if(Vx != Vy); Skips the next instruction if Vx doesn't equal Vy.
 
-void emu::SkipRegisterNotEqualInstruction::Execute() noexcept {}
+void ch8::SkipRegisterNotEqualInstruction::Execute() noexcept {}
 
-void emu::SkipRegisterNotEqualInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipRegisterNotEqualInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
     u8 vy = getLeftNibble(r);
     PrintInstruction(i, "SRNE");
@@ -290,9 +292,9 @@ void emu::SkipRegisterNotEqualInstruction::Disassemble(u16 i) const noexcept {
 
 // Annn: i = nnn; Sets i to the address nnn.
 
-void emu::MoveAddressInstruction::Execute() noexcept {}
+void ch8::MoveAddressInstruction::Execute() noexcept {}
 
-void emu::MoveAddressInstruction::Disassemble(u16 i) const noexcept {
+void ch8::MoveAddressInstruction::Disassemble(u16 i) const noexcept {
     u16 nnn = get16BitAddress(l, r);
     PrintInstruction(i, "MOVI");
     printf("%X", nnn);
@@ -301,9 +303,9 @@ void emu::MoveAddressInstruction::Disassemble(u16 i) const noexcept {
 
 // Bnnn: PC = V0 + nnn; Jumps to the address nnn plus V0.
 
-void emu::JumpRegisterInstruction::Execute() noexcept {}
+void ch8::JumpRegisterInstruction::Execute() noexcept {}
 
-void emu::JumpRegisterInstruction::Disassemble(u16 i) const noexcept {
+void ch8::JumpRegisterInstruction::Disassemble(u16 i) const noexcept {
     i16 nnn = get16BitAddress(l, r);
     PrintInstruction(i, "JMPV");
     printf("%X", nnn);
@@ -312,9 +314,9 @@ void emu::JumpRegisterInstruction::Disassemble(u16 i) const noexcept {
 
 // Cxnn: Vx = rand() & nn; Sets Vx to the result of a bitwise and operation on a random number (Typically: 0 to 255) and nn.
 
-void emu::RandomMaskInstruction::Execute() noexcept {}
+void ch8::RandomMaskInstruction::Execute() noexcept {}
 
-void emu::RandomMaskInstruction::Disassemble(u16 i) const noexcept {
+void ch8::RandomMaskInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
     u8 nn = r;
     PrintInstruction(i, "RNDMSK");
@@ -327,9 +329,9 @@ void emu::RandomMaskInstruction::Disassemble(u16 i) const noexcept {
 // As described above, Vf is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn,
 // and to 0 if that doesn’t happen.
 
-void emu::DrawInstruction::Execute() noexcept {}
+void ch8::DrawInstruction::Execute() noexcept {}
 
-void emu::DrawInstruction::Disassemble(u16 i) const noexcept {
+void ch8::DrawInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
     u8 vy = getLeftNibble(r);
     u8 n = getRightNibble(r);
@@ -342,9 +344,9 @@ void emu::DrawInstruction::Disassemble(u16 i) const noexcept {
 
 // Exnn: Skip (usually the next instruction is a jump to skip a code block).
 
-void emu::SkipKeyInstruction::Execute() noexcept {}
+void ch8::SkipKeyInstruction::Execute() noexcept {}
 
-void emu::SkipKeyInstruction::Disassemble(u16 i) const noexcept {
+void ch8::SkipKeyInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
 
     switch (r) {
@@ -367,9 +369,9 @@ void emu::SkipKeyInstruction::Disassemble(u16 i) const noexcept {
 
 // Fxkk: F stands for Fun!
 
-void emu::FunInstruction::Execute() noexcept {}
+void ch8::FunInstruction::Execute() noexcept {}
 
-void emu::FunInstruction::Disassemble(u16 i) const noexcept {
+void ch8::FunInstruction::Disassemble(u16 i) const noexcept {
     u8 vx = getRightNibble(l);
 
     switch (r) {
