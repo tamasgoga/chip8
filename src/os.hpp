@@ -30,8 +30,8 @@ namespace os {
     std::vector<u8> ReadChip8File(std::string path);
 
     // File error handling.
-    bool        HasFileError() noexcept;
-    const char* GetFileError() noexcept;
+    bool               HasFileError() noexcept;
+    const std::string& GetFileError() noexcept;
 }
 
 #endif // GOGA_TAMAS_CHIP_8_OS_HPP

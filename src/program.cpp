@@ -4,17 +4,18 @@
 
 // C-tors
 
-ch8::Program::Program(ch8::Chip8& state, const char *path, u32 options)
+ch8::Program::Program(ch8::Chip8& state, ch8::Interface& interface, const char *path, u32 options)
     : arguments(path, options)
     , state(state)
-
+    , interface(interface)
 {
     ParseBytes(os::ReadChip8File(arguments.path));
 }
 
-ch8::Program::Program(ch8::Chip8& state, int argc, char **argv)
+ch8::Program::Program(ch8::Chip8& state, ch8::Interface& interface, int argc, char **argv)
     : arguments(argc, argv)
     , state(state)
+    , interface(interface)
 {
     ParseBytes(os::ReadChip8File(arguments.path));
 }
@@ -199,8 +200,20 @@ void ch8::Program::DumpHex() const noexcept {
 void ch8::Program::Execute() noexcept {
     state.Reset();
 
-    for (auto &instr: program) {
-        instr->Execute();
+    bool isRunning = true;
+    SDL_Event event;
+
+    interface.start("Chip-8", 800, 600);
+    SDL_SetRenderDrawColor(interface.renderer, 0,0,0, 255);
+    SDL_RenderClear(interface.renderer);
+    SDL_RenderPresent(interface.renderer);
+
+    while (isRunning) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                isRunning = false;
+            }
+        }
     }
 }
 

@@ -27,12 +27,12 @@ os::Arguments::Arguments(int count, char** args) {
 
 // Files
 
-static const char* fileError = nullptr;
+static std::string fileError;
 
 // Not optimal, since we will have to parse the vector again.
 // Good enough, though, considering these programs should be less than 4KB.
 std::vector<u8> os::ReadChip8File(std::string path) {        
-    fileError = nullptr;
+    fileError.clear();
     std::ifstream file(path, std::ios::binary);
 
     if (!file.is_open()) {
@@ -51,9 +51,9 @@ std::vector<u8> os::ReadChip8File(std::string path) {
 }
 
 bool os::HasFileError() noexcept {
-    return fileError != nullptr;
+    return !fileError.empty();
 }
 
-const char* os::GetFileError() noexcept {
-    return fileError != nullptr ? fileError : ""; 
+const std::string& os::GetFileError() noexcept {
+    return fileError;
 }

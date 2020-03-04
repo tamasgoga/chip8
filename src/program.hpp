@@ -3,6 +3,7 @@
 
 #include "os.hpp"
 #include "chip8.hpp"
+#include "sdl.hpp"
 
 namespace ch8 {
     class Program {
@@ -12,8 +13,8 @@ namespace ch8 {
 
         const os::Arguments arguments;
         
-        Program(ch8::Chip8& state, const char* path, u32 options);
-        Program(ch8::Chip8& state, int argc, char** argv);
+        Program(ch8::Chip8& state, ch8::Interface& interface, const char* path, u32 options);
+        Program(ch8::Chip8& state, ch8::Interface& interface, int argc, char** argv);
 
         void DumpHex() const noexcept;
 
@@ -24,6 +25,8 @@ namespace ch8 {
         void ParseBytes(std::vector<u8> bytes);
 
         Chip8& state;
+        Interface& interface;
+
         instruction_vector program;
     };
 }

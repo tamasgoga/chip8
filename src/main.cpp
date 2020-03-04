@@ -2,6 +2,7 @@
 #include <exception>
 
 #include "program.hpp"
+#include "sdl.hpp"
 
 // OPTIONS:
 // hex
@@ -12,8 +13,9 @@ void Run(int argc, char** argv) {
     using std::cout;
     using std::endl;
 
-    ch8::Chip8 emu;
-    ch8::Program program(emu, argc, argv);
+    ch8::Chip8 state;
+    ch8::Interface interface;
+    ch8::Program program(state, interface, argc, argv);
 
     if (program.arguments.path.empty()) {
         cout << "Usage: chip8 <options> path_to_rom" << endl;
@@ -38,7 +40,7 @@ void Run(int argc, char** argv) {
     }
 
     if (!program.arguments.IsEnabled(ch8::OPTIONS_NOEXEC)) {
-        cout << "Will execute\n" << endl;
+        program.Execute();
     }
 
     cout << program.arguments.options << ' ' << program.arguments.path << endl;
@@ -48,8 +50,9 @@ int QuickTest(int argc, char** argv) {
     using std::cout;
     using std::endl;
 
-    ch8::Chip8 emu;
-    ch8::Program program(emu, "roms/games/Paddles.ch8", 1);
+    ch8::Chip8 state;
+    ch8::Interface interface;
+    ch8::Program program(state, interface, "roms/games/Paddles.ch8", 1);
     // emu::Program program("roms/programs/SQRT Test [Sergey Naydenov, 2010].ch8", 1);
     cout << os::GetFileError() << endl;
 
