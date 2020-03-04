@@ -13,6 +13,7 @@ namespace ch8 {
         SDL_Renderer* renderer;
 
         std::string error;
+
         Interface();
         ~Interface();
 

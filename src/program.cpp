@@ -1,4 +1,4 @@
-#include <cstdio>
+#include <iostream>
 
 #include "program.hpp"
 
@@ -203,7 +203,10 @@ void ch8::Program::Execute() noexcept {
     bool isRunning = true;
     SDL_Event event;
 
-    interface.start("Chip-8", 800, 600);
+    if (!interface.start("Chip-8", 800, 600)) {
+        std::cerr << interface.error << std::endl;
+    }
+
     SDL_SetRenderDrawColor(interface.renderer, 0,0,0, 255);
     SDL_RenderClear(interface.renderer);
     SDL_RenderPresent(interface.renderer);
