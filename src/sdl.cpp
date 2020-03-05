@@ -15,9 +15,13 @@ static inline void startSDL() {
 }
 
 static inline void stopSDL() noexcept {
-    if (interfaceCount-- == 1u) {
-        SDL_Quit();
+    if (interfaceCount > 1u) {
+        --interfaceCount;
+        return;
     }
+
+    interfaceCount = 0;
+    SDL_Quit();
 }
 
 
