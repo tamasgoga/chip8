@@ -9,23 +9,20 @@
 
 namespace ch8 {
     struct Interface {
-        SDL_Window* window;
-        SDL_Renderer* renderer;
-
-        std::string error;
+        SDL_Window* window = nullptr;
+        SDL_Renderer* renderer = nullptr;
 
         Interface();
         ~Interface();
 
-        // No copying. That would mean complete reinitialization.
-        Interface(const Interface&) = delete;
-        Interface& operator=(const Interface&) = delete;
+        Interface(const Interface&);
+        Interface& operator=(const Interface&);
 
-        // May be moved.
         Interface(Interface&& other);
         Interface& operator=(Interface&& other);
 
-        bool Start(const char* title, i32 width, i32 height) noexcept;
+        // Will throw a runtime_error if SDL, the window or the renderer fails to initialize.
+        void Start(const char* title, i32 width, i32 height);
         void Stop() noexcept;
 
         // The rest of the functions only make sense if start was already called.

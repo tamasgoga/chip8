@@ -203,10 +203,7 @@ void ch8::Program::Execute() noexcept {
     bool isRunning = true;
     SDL_Event event;
 
-    if (!interface.Start("Chip-8", 800, 600)) {
-        std::cerr << interface.error << std::endl;
-    }
-
+    interface.Start("Chip-8", 800, 600);
     interface.ClearScreen();
 
     while (isRunning) {
