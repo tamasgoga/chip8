@@ -16,26 +16,20 @@
 namespace ch8 {
     // The Chip-8's CPU.
     struct Chip8 {
-        static constexpr u16 MEM_START    = 0x200;
-        static constexpr u16 MEM_SIZE     = 0x1000;
-        static constexpr u16 SCREEN_START = 0xf00;
-        static constexpr u16 STACK_SIZE   = 0x10;
-
         std::array<u8, 16>          v;      // Registers
         u16                         i;      // Big register, usually for storing an address
         u16                         sp;     // Stack pointer
         u16                         pc;     // Program counter
         u8                          dt;     // Delay timer
         u8                          st;     // Sound timer
-        std::array<u8, MEM_SIZE>    memory; // Memory available to programs (first 512 bytes unused, they were reserved for the interpreter)
         std::array<u16, STACK_SIZE> stack;  // Decided to implement the stack separately, to make my life easier
+        // std::array<u8, MEM_SIZE>    memory; // Memory available to programs (first 512 bytes unused, they were reserved for the interpreter)
 
         Chip8() {
             Reset();
         }
 
         void Reset() {
-            memory.fill(0);
             stack.fill(0);
             sp = 0;
             pc = MEM_START;

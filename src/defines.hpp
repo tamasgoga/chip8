@@ -21,6 +21,12 @@ namespace ch8 {
         OPTIONS_CODE   = 0x2,
         OPTIONS_NOEXEC = 0x4
     };
+
+    constexpr u16 MEM_START    = 0x200;
+    constexpr u16 MEM_SIZE     = 0x1000;
+    constexpr u16 SCREEN_START = 0xf00;
+    constexpr u16 STACK_SIZE   = 0x10;
+    constexpr u16 MAX_PROG_LEN = MEM_SIZE - MEM_START - (MEM_SIZE - SCREEN_START);
 }
 
 #endif // GOGA_TAMAS_CHIP_8_DEFINES_HPP

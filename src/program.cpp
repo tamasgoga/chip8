@@ -182,13 +182,13 @@ void ch8::Program::DumpHex() const noexcept {
     }
 
     auto handle = program[0].get();
-    printf("%.4x:   %.2x%.2x ", Chip8::MEM_START, handle->l, handle->r);
+    printf("%.4x:   %.2x%.2x ", MEM_START, handle->l, handle->r);
 
     for (u32 i = 1u; i < program.size(); i++) {
         handle = program[i].get();
 
         if (i % 8 == 0u) {
-            printf("\n%.4x:   ", Chip8::MEM_START + i * 2u);
+            printf("\n%.4x:   ", MEM_START + i * 2u);
         }
 
         printf("%.2x%.2x ", handle->l, handle->r);
@@ -203,7 +203,7 @@ void ch8::Program::Execute() noexcept {
     bool isRunning = true;
     SDL_Event event;
 
-    if (!interface.start("Chip-8", 800, 600)) {
+    if (!interface.Start("Chip-8", 800, 600)) {
         std::cerr << interface.error << std::endl;
     }
 
@@ -216,6 +216,8 @@ void ch8::Program::Execute() noexcept {
             }
         }
     }
+
+    interface.Stop();
 }
 
 void ch8::Program::Disassemble() noexcept {

@@ -27,6 +27,7 @@ namespace os {
 
     // We will assume that the file can be stored in memory all at once.
     // Also, the program cannot have an odd number of bytes, as per the spec.
+    // It must also fit within Chip-8's memory constraints.
     std::vector<u8> ReadChip8File(std::string path);
 
     // File error handling.

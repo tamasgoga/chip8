@@ -17,10 +17,16 @@ namespace ch8 {
         Interface();
         ~Interface();
 
-        // Don't forget copy & move.
+        // No copying. That would mean complete reinitialization.
+        Interface(const Interface&) = delete;
+        Interface& operator=(const Interface&) = delete;
 
-        bool start(const char* title, i32 width, i32 height) noexcept;
-        void stop() noexcept;
+        // May be moved.
+        Interface(Interface&& other);
+        Interface& operator=(Interface&& other);
+
+        bool Start(const char* title, i32 width, i32 height) noexcept;
+        void Stop() noexcept;
 
         // The rest of the functions only make sense if start was already called.
         // I hereby declare that calling any of these without starting first UNDEFINED BEHAVIOUR.
