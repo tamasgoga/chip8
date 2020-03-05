@@ -19,7 +19,7 @@ namespace ch8 {
         static constexpr u16 MEM_START    = 0x200;
         static constexpr u16 MEM_SIZE     = 0x1000;
         static constexpr u16 SCREEN_START = 0xf00;
-        static constexpr u16 STACK_SIZE   = 0x20;
+        static constexpr u16 STACK_SIZE   = 0x10;
 
         std::array<u8, 16>          v;      // Registers
         u16                         i;      // Big register, usually for storing an address
@@ -35,7 +35,8 @@ namespace ch8 {
         }
 
         void Reset() {
-            // screen = memory[SCREEN_START];
+            memory.fill(0);
+            stack.fill(0);
             sp = 0;
             pc = MEM_START;
         }
