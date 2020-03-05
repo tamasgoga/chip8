@@ -203,6 +203,7 @@ void ch8::Program::Execute() noexcept {
     bool isRunning = true;
     SDL_Event event;
 
+    // If start doesn't throw, we're guaranteed to have SDL set up correctly.
     interface.Start("Chip-8", 800, 600);
     interface.ClearScreen();
 

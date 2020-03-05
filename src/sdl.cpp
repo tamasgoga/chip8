@@ -20,7 +20,7 @@ static inline void stopSDL() noexcept {
         return;
     }
 
-    interfaceCount = 0;
+    interfaceCount = 0u;
     SDL_Quit();
 }
 

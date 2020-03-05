@@ -23,7 +23,6 @@ namespace ch8 {
         u8                          dt;     // Delay timer
         u8                          st;     // Sound timer
         std::array<u16, STACK_SIZE> stack;  // Decided to implement the stack separately, to make my life easier
-        // std::array<u8, MEM_SIZE>    memory; // Memory available to programs (first 512 bytes unused, they were reserved for the interpreter)
 
         Chip8() {
             Reset();

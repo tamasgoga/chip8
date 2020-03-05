@@ -1,6 +1,7 @@
 #ifndef GOGA_TAMAS_CHIP_8_PROGRAM_HPP
 #define GOGA_TAMAS_CHIP_8_PROGRAM_HPP
 
+#include <memory>
 #include "os.hpp"
 #include "chip8.hpp"
 #include "sdl.hpp"
