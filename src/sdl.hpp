@@ -21,6 +21,15 @@ namespace ch8 {
 
         bool start(const char* title, i32 width, i32 height) noexcept;
         void stop() noexcept;
+
+        // The rest of the functions only make sense if start was already called.
+        // I hereby declare that calling any of these without starting first UNDEFINED BEHAVIOUR.
+
+        void ClearScreen() noexcept {
+            SDL_SetRenderDrawColor(renderer, 0,0,0, 255);
+            SDL_RenderClear(renderer);
+            SDL_RenderPresent(renderer);
+        }
     };
 }
 

@@ -34,7 +34,7 @@ void ch8::Program::ParseBytes(std::vector<u8> bytes) {
         case 0x00:
             switch (r) {
             case 0xe0:
-                program.push_back(make_unique<ClearScreenInstruction>(state, l, r));
+                program.push_back(make_unique<ClearScreenInstruction>(state, interface, l, r));
                 break;
             case 0xee:
                 program.push_back(make_unique<ReturnInstruction>(state, l, r));
@@ -207,9 +207,7 @@ void ch8::Program::Execute() noexcept {
         std::cerr << interface.error << std::endl;
     }
 
-    SDL_SetRenderDrawColor(interface.renderer, 0,0,0, 255);
-    SDL_RenderClear(interface.renderer);
-    SDL_RenderPresent(interface.renderer);
+    interface.ClearScreen();
 
     while (isRunning) {
         while (SDL_PollEvent(&event)) {

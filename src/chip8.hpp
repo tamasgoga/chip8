@@ -6,24 +6,29 @@
 #include <memory>
 
 #include "defines.hpp"
+#include "sdl.hpp"
 
 // Contains the Chip-8's CPU layout & all of its instructions.
+
+// Note: I decided to implement the stack separately, to make my life easier.
+//       I couldn't find any authoritative resource that prohibited me from doing so.
 
 namespace ch8 {
     // The Chip-8's CPU.
     struct Chip8 {
-        static const u16 MEM_START    = 0x200;
-        static const u16 STACK_START  = 0xfa0;
-        static const u16 SCREEN_START = 0xf00;
+        static constexpr u16 MEM_START    = 0x200;
+        static constexpr u16 MEM_SIZE     = 0x1000;
+        static constexpr u16 SCREEN_START = 0xf00;
+        static constexpr u16 STACK_SIZE   = 0x20;
 
-        std::array<u8, 16>     v;      // registers
-        u16                    i;      // address register
-        u16                    sp;     // stack pointer
-        u16                    pc;     // program counter
-        u8                     dt;     // delay timer
-        u8                     st;     // sound timer
-        std::array<u8, 4096>   memory; //
-        // u8*                    screen; // points to memory[0xF00]
+        std::array<u8, 16>          v;      // Registers
+        u16                         i;      // Big register, usually for storing an address
+        u16                         sp;     // Stack pointer
+        u16                         pc;     // Program counter
+        u8                          dt;     // Delay timer
+        u8                          st;     // Sound timer
+        std::array<u8, MEM_SIZE>    memory; // Memory available to programs (first 512 bytes unused, they were reserved for the interpreter)
+        std::array<u16, STACK_SIZE> stack;  // Decided to implement the stack separately, to make my life easier
 
         Chip8() {
             Reset();
@@ -31,7 +36,7 @@ namespace ch8 {
 
         void Reset() {
             // screen = memory[SCREEN_START];
-            sp = STACK_START;
+            sp = 0;
             pc = MEM_START;
         }
     };
@@ -69,9 +74,11 @@ namespace ch8 {
     // 0x0
     class ClearScreenInstruction: public Instruction {
     public:
-        ClearScreenInstruction(Chip8& s, u8 l, u8 r): Instruction(s,l,r) {}
+        ClearScreenInstruction(Chip8& s, Interface& i, u8 l, u8 r): Instruction(s,l,r), interface(i) {}
         void Execute() noexcept override;
         void Disassemble() noexcept override;
+    private:
+        Interface& interface;
     };
 
     class ReturnInstruction: public Instruction {

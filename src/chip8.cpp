@@ -19,7 +19,9 @@ void ch8::Instruction::Disassemble() noexcept {
 
 // 00e0: Clear screen.
 
-void ch8::ClearScreenInstruction::Execute() noexcept {}
+void ch8::ClearScreenInstruction::Execute() noexcept {
+    interface.ClearScreen();
+}
 
 void ch8::ClearScreenInstruction::Disassemble() noexcept {
     PrintInstruction("CLS");
