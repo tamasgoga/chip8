@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-
 #include "defines.hpp"
 
 // To the best of my knowledge, I will separate OS specific things here.

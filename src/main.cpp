@@ -1,8 +1,6 @@
 #include <iostream>
 #include <exception>
-
-#include "program.hpp"
-#include "sdl.hpp"
+#include "chip8.hpp"
 
 // OPTIONS:
 // hex

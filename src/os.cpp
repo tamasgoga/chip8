@@ -1,6 +1,5 @@
 #include <cstring>
 #include <fstream>
-
 #include "os.hpp"
 
 // Arguments
